@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReelShort | 轻量短视频灵感站</title>
-  <meta name="description" content="ReelShort 是我正在筹备的短视频灵感站点，后续功能将陆续上线。">
+  <title>ReelShort | AI 剧情模板视频生成平台</title>
+  <meta name="description" content="基于经典影视模板，快速生成专属 AI 剧情短视频的站点框架，采用 NextUI 风格。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,126 +13,432 @@
 <body>
   <header class="site-header">
     <div class="brand">
-      <span class="logo">🎬</span>
+      <span class="logo">🎥</span>
       <div class="brand-text">
         <strong>ReelShort</strong>
-        <small>短视频灵感库</small>
+        <small>AI 剧情模板视频生成平台</small>
       </div>
     </div>
     <nav class="nav">
-      <a href="#vision">愿景</a>
-      <a href="#plan">计划</a>
-      <a href="#notes">记事板</a>
+      <a href="#overview">概览</a>
+      <a href="#templates">模板库</a>
+      <a href="#editor">模板编辑器</a>
+      <a href="#pipeline">生成流程</a>
+      <a href="#pricing">套餐</a>
+      <a href="#roadmap">里程碑</a>
     </nav>
   </header>
 
   <main>
     <section class="hero">
-      <p class="eyebrow">新站起航 · 施工中</p>
-      <h1>为短视频创作准备的轻量空间</h1>
-      <p class="lede">先把地基打好，后续会逐步填充作品陈列、灵感收集、播放体验等模块。敬请期待！</p>
-      <div class="cta-row">
-        <a class="cta" href="#plan">查看规划</a>
-        <span class="status-pill">版本 0.1 · 初始架构</span>
+      <div class="hero-body">
+        <p class="eyebrow">v1.0 框架已搭建 · NextUI 设计语言</p>
+        <h1>用经典影视模板，一键生成你的 AI 剧情短视频</h1>
+        <p class="lede">围绕“模板库 → 模板编辑器 → AI 生成 → 用户中心”的全流程体验，当前页面仅呈现站点框架与占位逻辑，视频/语音/模型调用接口已预留，后续可直接接入 Runway、Pika、Sora、TTS 等服务。</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#templates">浏览模板框架</a>
+          <a class="btn ghost" href="#api">查看接口占位</a>
+          <span class="pill">Phase 1 · 基础框架</span>
+        </div>
+        <div class="hero-cards">
+          <article class="card">
+            <p class="badge">降低门槛</p>
+            <h3>无需剪辑/编剧</h3>
+            <p>通过结构化模板与变量表单，普通用户也能快速生成剧情视频。</p>
+          </article>
+          <article class="card">
+            <p class="badge">可复用</p>
+            <h3>故事结构复用</h3>
+            <p>基于经典影视结构，替换角色、地点、冲突等变量即可产出新故事。</p>
+          </article>
+          <article class="card">
+            <p class="badge">生态</p>
+            <h3>创作者模板市场</h3>
+            <p>预留创作者上传、分享与授权入口，为模板生态化做好准备。</p>
+          </article>
+        </div>
       </div>
-      <div class="hero-cards">
-        <div class="card">
-          <h3>定位</h3>
-          <p>面向短视频作者的作品陈列与灵感展示，聚焦轻量、快速、沉浸式浏览。</p>
+      <div class="hero-sidecard">
+        <div class="sidecard-head">
+          <span class="dot online"></span> 当前状态
         </div>
-        <div class="card">
-          <h3>风格</h3>
-          <p>强调封面视觉与观看入口，弱化干扰信息，突出“短、快、准”。</p>
-        </div>
-        <div class="card">
-          <h3>节奏</h3>
-          <p>逐步发布，先上线基础框架，再补充功能与内容，以迭代驱动完善。</p>
+        <ul class="checklist">
+          <li><span class="dot success"></span> 信息架构与导航</li>
+          <li><span class="dot success"></span> 模块化版块布局</li>
+          <li><span class="dot warning"></span> 外部视频/语音接口：待对接</li>
+          <li><span class="dot warning"></span> 生成队列 &amp; 计费：待接入</li>
+        </ul>
+        <div class="sidecard-footer">
+          <p class="muted">本页采用 NextUI 卡片、徽章、时间轴风格，便于后续迁移至 Next.js + NextUI 组件。</p>
         </div>
       </div>
     </section>
 
-    <section id="vision" class="section">
+    <section id="overview" class="section">
       <div class="section-head">
-        <p class="eyebrow">愿景</p>
-        <h2>让创作者的每个灵感都能被快速看见</h2>
-        <p class="section-desc">ReelShort 将专注于短视频的呈现与分发，提供清晰的作品墙、简洁的播放页，以及后续的数据洞察能力。</p>
+        <p class="eyebrow">产品目标 & 价值</p>
+        <h2>让每个人都能用模板讲好故事</h2>
+        <p class="section-desc">围绕普通用户、内容创作者、品牌/IP 三类群体提供定制化价值，匹配 PRD 的目标、价值与场景。</p>
       </div>
-      <div class="grid">
-        <article class="card highlight">
-          <h3>内容墙</h3>
-          <p>封面瀑布流、可筛选标签、分类导航，便于访客快速预览与选择。</p>
+      <div class="grid three">
+        <article class="card">
+          <h3>目标用户</h3>
+          <ul class="list">
+            <li>普通用户：一键生成趣味视频</li>
+            <li>内容创作者：高效脚本与成片自动化</li>
+            <li>IP/品牌方：可控模板与品牌化输出</li>
+          </ul>
         </article>
-        <article class="card highlight">
-          <h3>播放体验</h3>
-          <p>轻量播放器与键盘/手势控制，强调连贯的短视频浏览体验。</p>
+        <article class="card">
+          <h3>关键场景</h3>
+          <ul class="list">
+            <li>快速生成故事视频</li>
+            <li>深度定制：变量、Prompt、分镜</li>
+            <li>生成脚本用于拍摄或剪辑</li>
+            <li>模板创作者生态（未来）</li>
+          </ul>
         </article>
-        <article class="card highlight">
-          <h3>创作者角</h3>
-          <p>为每支短片保留创作动机、制作花絮与素材出处，记录灵感来源。</p>
+        <article class="card">
+          <h3>成功度量</h3>
+          <ul class="list">
+            <li>模板转化率：模板 → 生成请求</li>
+            <li>生成完成率 & 队列时延</li>
+            <li>留存：收藏模板、复用模板次数</li>
+            <li>付费转化：Pro & 创作者版</li>
+          </ul>
         </article>
       </div>
     </section>
 
-    <section id="plan" class="section plan">
+    <section id="templates" class="section">
       <div class="section-head">
-        <p class="eyebrow">建设计划</p>
-        <h2>轻量迭代路线</h2>
-        <p class="section-desc">当前仅搭建基础框架，后续按阶段完善功能，保持每一步都可访问与体验。</p>
+        <p class="eyebrow">模块 01</p>
+        <h2>模板库（Templates Library）</h2>
+        <p class="section-desc">按分类、标签、搜索呈现经典影视/剧情模板，详情页展示结构、变量与示例脚本。</p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <p class="badge">分类/推荐</p>
+          <h3>电影、剧集、类型、创作者精选</h3>
+          <p class="muted">支持关键词搜索与热门推荐逻辑，占位的筛选条可直接绑定后端数据。</p>
+        </article>
+        <article class="card">
+          <p class="badge">模板详情</p>
+          <h3>简介 · 场景结构 · 示例脚本</h3>
+          <p class="muted">展示变量占位符、示例视频位与故事结构树，便于快速评估。</p>
+        </article>
+        <article class="card">
+          <p class="badge">收藏/使用</p>
+          <h3>一键收藏与“使用此模板”</h3>
+          <p class="muted">调用占位函数 <code>useTemplate(templateId)</code>，后续可挂载真实 API。</p>
+        </article>
+      </div>
+      <div class="pill-group">
+        <span class="pill ghost">搜索：角色 / 电影名 / 类型</span>
+        <span class="pill ghost">模板卡片：封面 + 标签 + 受欢迎度</span>
+        <span class="pill ghost">收藏夹：用户中心入口</span>
+      </div>
+    </section>
+
+    <section id="editor" class="section">
+      <div class="section-head">
+        <p class="eyebrow">模块 02</p>
+        <h2>模板编辑器（Template Editor）</h2>
+        <p class="section-desc">表单变量替换 + 高级 Prompt + 分镜脚本三段式结构，便于逐层细化。</p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <p class="badge">变量替换区</p>
+          <h3>表单驱动的参数填写</h3>
+          <ul class="list">
+            <li>主角姓名/性别/年龄</li>
+            <li>地点、背景设定、冲突、反派</li>
+            <li>结局方向：喜剧/悲剧/开放式</li>
+          </ul>
+          <p class="muted">输入后实时同步占位符，保留 <code>onVariableChange</code> 回调接口。</p>
+        </article>
+        <article class="card">
+          <p class="badge">高级 Prompt</p>
+          <h3>Prompt 预览与一键优化</h3>
+          <ul class="list">
+            <li>查看/编辑完整 Prompt</li>
+            <li>追加“更电影感”等修饰词</li>
+            <li>增删场景结构，LLM 优化入口预留</li>
+          </ul>
+        </article>
+        <article class="card">
+          <p class="badge">分镜脚本</p>
+          <h3>Scene Breakdown</h3>
+          <ul class="list">
+            <li>镜头描述、角色动作、对白</li>
+            <li>可视化分镜列表</li>
+            <li>导出为生成管线输入</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="pipeline" class="section">
+      <div class="section-head">
+        <p class="eyebrow">模块 03</p>
+        <h2>AI 视频生成流程</h2>
+        <p class="section-desc">从 Prompt 合成到分镜、配音、BGM、视频合成的完整流水线，当前以占位状态呈现，可直接挂接外部模型。</p>
+      </div>
+      <div class="pipeline">
+        <div class="step">
+          <span class="step-index">01</span>
+          <div>
+            <h4>合成最终 Prompt</h4>
+            <p class="muted">聚合变量、模板结构与高级指令，输出标准化 Prompt。</p>
+          </div>
+          <span class="chip">已就绪</span>
+        </div>
+        <div class="step">
+          <span class="step-index">02</span>
+          <div>
+            <h4>分镜生成</h4>
+            <p class="muted">Scene Engine 占位：<code>POST /api/storyboards</code>。</p>
+          </div>
+          <span class="chip">待接入</span>
+        </div>
+        <div class="step">
+          <span class="step-index">03</span>
+          <div>
+            <h4>视频/人物风格</h4>
+            <p class="muted">支持写实/动画/赛博朋克/历史/浪漫主义；人物真人/动漫/低模。</p>
+          </div>
+          <span class="chip">占位</span>
+        </div>
+        <div class="step">
+          <span class="step-index">04</span>
+          <div>
+            <h4>配音 &amp; BGM</h4>
+            <p class="muted">TTS &amp; BGM Engine 占位：<code>POST /api/audio</code>。</p>
+          </div>
+          <span class="chip">待接入</span>
+        </div>
+        <div class="step">
+          <span class="step-index">05</span>
+          <div>
+            <h4>视频合成与下载</h4>
+            <p class="muted">Video Engine 占位：<code>POST /api/videos</code>，支持 15/30/60/90 秒。</p>
+          </div>
+          <span class="chip">占位</span>
+        </div>
+      </div>
+      <div class="pill-group">
+        <span class="pill ghost">生成队列：展示排队状态 & 剩余时间</span>
+        <span class="pill ghost">结果：高清下载 / 链接分享 / 社交分享</span>
+      </div>
+    </section>
+
+    <section id="dashboard" class="section">
+      <div class="section-head">
+        <p class="eyebrow">模块 04</p>
+        <h2>用户中心</h2>
+        <p class="section-desc">覆盖作品、模板、收藏、账户、付费、历史、配额的统一入口。</p>
+      </div>
+      <div class="grid four">
+        <article class="card"><h3>我的作品</h3><p class="muted">视频列表、生成状态、重新生成。</p></article>
+        <article class="card"><h3>我的/收藏模板</h3><p class="muted">收藏夹与自建模板管理。</p></article>
+        <article class="card"><h3>生成历史</h3><p class="muted">完整 Prompt 追溯与版本记录。</p></article>
+        <article class="card"><h3>付费记录 &amp; 配额</h3><p class="muted">套餐、计费记录、API 调用配额。</p></article>
+      </div>
+    </section>
+
+    <section id="pricing" class="section">
+      <div class="section-head">
+        <p class="eyebrow">登录与付费体系</p>
+        <h2>套餐与权限</h2>
+        <p class="section-desc">对应 PRD 的免费版、Pro、创作者版三档配置，预留登录与支付接口。</p>
+      </div>
+      <div class="pricing">
+        <article class="plan">
+          <p class="badge">免费版</p>
+          <h3>¥0</h3>
+          <ul class="list">
+            <li>每日 1 次生成</li>
+            <li>低分辨率视频</li>
+            <li>微信 / Google / 邮箱登录占位</li>
+          </ul>
+          <button class="btn block ghost">立即体验</button>
+        </article>
+        <article class="plan">
+          <p class="badge">Pro（月付）</p>
+          <h3>¥XX</h3>
+          <ul class="list">
+            <li>高清输出，多次生成</li>
+            <li>优先队列</li>
+            <li>高级编辑能力</li>
+          </ul>
+          <button class="btn block primary">升级</button>
+        </article>
+        <article class="plan">
+          <p class="badge">创作者版</p>
+          <h3>¥XX</h3>
+          <ul class="list">
+            <li>上传/出售模板</li>
+            <li>商业用途授权</li>
+            <li>模板收益分成</li>
+          </ul>
+          <button class="btn block ghost">即将开放</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="tech" class="section">
+      <div class="section-head">
+        <p class="eyebrow">技术架构</p>
+        <h2>NextUI + 插件化 AI 引擎</h2>
+        <p class="section-desc">前端采用 Next.js/React + NextUI 设计体系；后端与 AI 引擎以插件式抽象，便于快速替换模型。</p>
+      </div>
+      <div class="grid three">
+        <article class="card">
+          <h3>前端</h3>
+          <ul class="list">
+            <li>Next.js + NextUI 组件</li>
+            <li>Tailwind/SSR 可选</li>
+            <li>状态管理：Zustand/Redux</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>后端</h3>
+          <ul class="list">
+            <li>Node (Nest) / Python (FastAPI)</li>
+            <li>用户、模板、任务、计费模块</li>
+            <li>S3 存储，队列管理</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>AI 引擎（插件）</h3>
+          <ul class="list">
+            <li>LLM 引擎：Prompt → 脚本</li>
+            <li>Scene Engine：脚本 → 分镜</li>
+            <li>Video / TTS / BGM 引擎</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="api" class="section">
+      <div class="section-head">
+        <p class="eyebrow">API 占位</p>
+        <h2>接口路径与状态</h2>
+        <p class="section-desc">预留 RESTful 占位，便于后续直接接入外部模型与支付。当前仅为展示，无真实请求。</p>
+      </div>
+      <div class="api-table">
+        <div class="api-row">
+          <div>
+            <p class="api-name">POST /api/templates/search</p>
+            <p class="muted">关键词搜索模板，返回分页列表。</p>
+          </div>
+          <span class="chip">占位</span>
+        </div>
+        <div class="api-row">
+          <div>
+            <p class="api-name">POST /api/storyboards</p>
+            <p class="muted">提交变量与 Prompt，生成分镜脚本。</p>
+          </div>
+          <span class="chip">待接入</span>
+        </div>
+        <div class="api-row">
+          <div>
+            <p class="api-name">POST /api/videos</p>
+            <p class="muted">调用视频生成模型（Runway/Pika/Sora）并返回下载地址。</p>
+          </div>
+          <span class="chip">待接入</span>
+        </div>
+        <div class="api-row">
+          <div>
+            <p class="api-name">POST /api/audio</p>
+            <p class="muted">TTS + BGM 生成，支持多语言、多声音色。</p>
+          </div>
+          <span class="chip">占位</span>
+        </div>
+        <div class="api-row">
+          <div>
+            <p class="api-name">GET /api/jobs/:id</p>
+            <p class="muted">查询生成任务状态、排队进度。</p>
+          </div>
+          <span class="chip">占位</span>
+        </div>
+        <div class="api-row">
+          <div>
+            <p class="api-name">POST /api/billing/checkout</p>
+            <p class="muted">对接 Stripe / 微信支付，完成套餐购买。</p>
+          </div>
+          <span class="chip">待接入</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="compliance" class="section">
+      <div class="section-head">
+        <p class="eyebrow">风控 & 合规</p>
+        <h2>版权、安全与内容审核</h2>
+        <p class="section-desc">严格区分“结构模板”与具体 IP 内容，加入敏感内容审核与 Deepfake 防滥用策略。</p>
+      </div>
+      <div class="pill-group">
+        <span class="pill">模板仅提供结构，不复刻剧情</span>
+        <span class="pill">敏感政治/暴力/未成年人内容审核</span>
+        <span class="pill">Deepfake 滥用防护与身份校验</span>
+        <span class="pill">版权声明 & 授权留痕</span>
+      </div>
+    </section>
+
+    <section id="roadmap" class="section">
+      <div class="section-head">
+        <p class="eyebrow">里程碑</p>
+        <h2>分阶段演进</h2>
+        <p class="section-desc">对应 PRD 阶段性目标，保持每阶段可落地、可演示。</p>
       </div>
       <ul class="timeline">
         <li>
-          <div class="dot"></div>
+          <div class="dot filled"></div>
           <div class="content">
-            <p class="label">阶段 01 · 框架上线</p>
-            <p class="detail">搭建基础页面结构、品牌区块与导航；预留内容位，便于持续补充。</p>
+            <p class="label">Phase 1 · MVP</p>
+            <p class="detail">模板库 + 编辑器 + 单镜头视频生成（当前框架覆盖）。</p>
           </div>
         </li>
         <li>
           <div class="dot"></div>
           <div class="content">
-            <p class="label">阶段 02 · 作品墙</p>
-            <p class="detail">接入首批短视频封面和分类，完善卡片版式与标签筛选。</p>
+            <p class="label">Phase 2</p>
+            <p class="detail">多镜头、多风格生成，用户中心上线。</p>
           </div>
         </li>
         <li>
           <div class="dot"></div>
           <div class="content">
-            <p class="label">阶段 03 · 播放与互动</p>
-            <p class="detail">引入播放页、快捷操作与互动入口，打通浏览到播放的闭环。</p>
+            <p class="label">Phase 3</p>
+            <p class="detail">商业化模块、模板市场与授权。</p>
           </div>
         </li>
         <li>
           <div class="dot"></div>
           <div class="content">
-            <p class="label">阶段 04 · 数据与优化</p>
-            <p class="detail">迭代性能、收集反馈，补充数据面板与分享能力，持续抛光体验。</p>
+            <p class="label">Phase 4</p>
+            <p class="detail">创作者生态、移动 App。</p>
           </div>
         </li>
       </ul>
     </section>
 
-    <section id="notes" class="section notes">
+    <section id="faq" class="section">
       <div class="section-head">
-        <p class="eyebrow">记事板</p>
-        <h2>当前进度 & 下一步</h2>
-        <p class="section-desc">用于记录上线节点、想法清单与下个版本的目标，方便后续迭代。</p>
+        <p class="eyebrow">常见问题</p>
+        <h2>关于接口与交付</h2>
+        <p class="section-desc">提前回答后续接入与扩展问题，便于团队对齐。</p>
       </div>
-      <div class="note-grid">
-        <div class="note">
-          <p class="badge ready">已完成</p>
-          <h3>仓库与初始框架</h3>
-          <p>创建 ReelShort 主页，提供品牌区块、愿景、规划与占位文案。</p>
-        </div>
-        <div class="note">
-          <p class="badge next">下一步</p>
-          <h3>添加示例内容</h3>
-          <p>准备首批短视频封面卡片与播放页跳转，验证整体浏览体验。</p>
-        </div>
-        <div class="note">
-          <p class="badge idea">想法</p>
-          <h3>交互和反馈</h3>
-          <p>支持键盘/手势切换、点赞收藏、以及内容提交入口，让互动更顺滑。</p>
-        </div>
+      <div class="grid two">
+        <article class="card">
+          <h3>如何切换模型供应商？</h3>
+          <p class="muted">AI 引擎采用插件化定义，只需在对应服务实现 <code>generateVideo()</code>、<code>generateVoice()</code> 等接口并在配置中切换。</p>
+        </article>
+        <article class="card">
+          <h3>如何接入登录/支付？</h3>
+          <p class="muted">保留 <code>/api/auth</code> 与 <code>/api/billing</code> 路由占位，可挂载微信/Google OAuth 与 Stripe/微信支付 SDK。</p>
+        </article>
       </div>
     </section>
   </main>
@@ -140,7 +446,7 @@
   <footer class="site-footer">
     <div>
       <strong>ReelShort</strong>
-      <p>短视频创作与灵感陈列，持续施工中。</p>
+      <p class="muted">AI 剧情模板视频生成平台 · 框架版</p>
     </div>
     <div class="footer-links">
       <a href="mailto:hi@reelshort.dev">hi@reelshort.dev</a>
