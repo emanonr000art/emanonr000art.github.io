@@ -22,6 +22,7 @@
     <nav class="nav">
       <a href="#overview">概览</a>
       <a href="#templates">模板库</a>
+      <a href="#story-library">故事库</a>
       <a href="#editor">模板编辑器</a>
       <a href="#pipeline">生成流程</a>
       <a href="#pricing">套餐</a>
@@ -34,7 +35,7 @@
       <div class="hero-body">
         <p class="eyebrow">v1.0 框架已搭建 · NextUI 设计语言</p>
         <h1>用经典影视模板，一键生成你的 AI 剧情短视频</h1>
-        <p class="lede">围绕“模板库 → 模板编辑器 → AI 生成 → 用户中心”的全流程体验，当前页面仅呈现站点框架与占位逻辑，视频/语音/模型调用接口已预留，后续可直接接入 Runway、Pika、Sora、TTS 等服务。</p>
+        <p class="lede">围绕“热门故事库 → 模板库 → 模板编辑器 → AI 生成 → 用户中心”的全流程体验，当前页面仅呈现站点框架与占位逻辑，视频/语音/模型调用接口已预留，后续可直接接入 Runway、Pika、Sora、TTS 等服务。</p>
         <div class="cta-row">
           <a class="btn primary" href="#templates">浏览模板框架</a>
           <a class="btn ghost" href="#api">查看接口占位</a>
@@ -140,9 +141,219 @@
       </div>
     </section>
 
-    <section id="editor" class="section">
+    <section id="story-library" class="section">
       <div class="section-head">
         <p class="eyebrow">模块 02</p>
+        <h2>热门经典故事库（Story Vault）</h2>
+        <p class="section-desc">将热门经典电视剧 &amp; 电影中的高传播记忆点转写为文字分镜，整理成可直接喂给 AI 的故事素材，确保生成效果稳定。</p>
+      </div>
+      <div class="library-meta">
+        <article class="card">
+          <p class="badge">选取原则</p>
+          <h3>情绪峰值 + 传播度 + 版权安全</h3>
+          <p class="muted">优先提取 30 秒-90 秒的情绪高点或反转桥段，标注情绪线、冲突点与出圈台词，只保留结构化描述避免版权侵权。</p>
+        </article>
+        <article class="card">
+          <p class="badge">喂给 AI 的格式</p>
+          <h3>文字分镜 · 角色变量 · 风格提示</h3>
+          <p class="muted">每个故事包含 4-8 个镜头节点，提供镜头景别、角色行为、台词/旁白、BGM/气氛提示，并预留 <code>{{role}}</code>、<code>{{location}}</code> 变量。</p>
+        </article>
+        <article class="card">
+          <p class="badge">应用入口</p>
+          <h3>一键选用 · 复制模板</h3>
+          <p class="muted">点击“加入生成”即可把分镜结构写入生成队列；“复制分镜模板”复制标准 JSON/Prompt 片段，方便直接调用模型。</p>
+        </article>
+      </div>
+      <div class="pill-group">
+        <span class="pill">类型：爱情 / 家庭 / 励志 / 悬疑</span>
+        <span class="pill">来源：电视剧 / 电影</span>
+        <span class="pill">时长：30s / 60s / 90s</span>
+        <span class="pill">变量：角色名、地点、时代背景</span>
+        <span class="pill ghost">质量：共鸣度 ≥ 8 /10 · 模型可控</span>
+      </div>
+      <div class="story-grid">
+        <article class="story-card">
+          <header class="story-head">
+            <div>
+              <p class="badge">电视剧 · 家庭群像</p>
+              <h3>《请回答1988》 · 被遗忘的生日</h3>
+              <p class="muted">德善生日无人记得，好友家人补上惊喜，情绪峰值从失落到治愈，适合“反转温暖”模版。</p>
+            </div>
+            <div class="story-meta">
+              <span class="chip">60s</span>
+              <span class="chip">情绪：失落 → 温暖</span>
+              <span class="chip">场景 5</span>
+            </div>
+          </header>
+          <div class="story-tags">
+            <span class="pill ghost">家庭</span>
+            <span class="pill ghost">成长</span>
+            <span class="pill ghost">治愈反转</span>
+            <span class="pill ghost">旁白可选</span>
+          </div>
+          <div class="story-beats">
+            <div class="beat">
+              <span class="beat-index">01</span>
+              <div>
+                <p class="beat-title">室内 · 清晨</p>
+                <p class="muted">{{role:德善}} 端着早餐，看着满桌只剩冷掉的面包，没人提起生日，嘴角勉强上扬。</p>
+              </div>
+              <span class="chip">00:00-00:12</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">02</span>
+              <div>
+                <p class="beat-title">学校走廊</p>
+                <p class="muted">朋友们被 {{role:珍珠}} 拉走，留下德善被忽视的背影；镜头推到她攥紧书本的手。</p>
+              </div>
+              <span class="chip">00:12-00:24</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">03</span>
+              <div>
+                <p class="beat-title">夜 · 小巷</p>
+                <p class="muted">灯光忽暗又亮，好友们端着拉面蛋糕冲出，大声唱生日歌；德善被拥抱时落泪，镜头环绕。</p>
+              </div>
+              <span class="chip">00:24-00:44</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">04</span>
+              <div>
+                <p class="beat-title">合影定格</p>
+                <p class="muted">旁白提示“把遗憾变成惊喜”并留出 {{bgm:温暖木吉他}}；镜头冻结在众人笑脸。</p>
+              </div>
+              <span class="chip">00:44-00:60</span>
+            </div>
+          </div>
+          <footer class="story-actions">
+            <button class="btn ghost">加入生成</button>
+            <button class="btn primary">复制分镜模板</button>
+          </footer>
+        </article>
+
+        <article class="story-card">
+          <header class="story-head">
+            <div>
+              <p class="badge">电影 · 灾难爱情</p>
+              <h3>《泰坦尼克号》 · 船头拥抱</h3>
+              <p class="muted">经典“I'm flying”瞬间，开放海景与自由象征，适合浪漫/励志剧情改写。</p>
+            </div>
+            <div class="story-meta">
+              <span class="chip">45s</span>
+              <span class="chip">情绪：压抑 → 释放</span>
+              <span class="chip">场景 4</span>
+            </div>
+          </header>
+          <div class="story-tags">
+            <span class="pill ghost">浪漫</span>
+            <span class="pill ghost">自由意象</span>
+            <span class="pill ghost">海景远景</span>
+            <span class="pill ghost">男女主可替换</span>
+          </div>
+          <div class="story-beats">
+            <div class="beat">
+              <span class="beat-index">01</span>
+              <div>
+                <p class="beat-title">甲板黄昏 · 推进</p>
+                <p class="muted">{{role:女主}} 被海风吹起头发，{{role:男主}} 拉她走向船头，镜头跟随穿过船员与旅客。</p>
+              </div>
+              <span class="chip">00:00-00:10</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">02</span>
+              <div>
+                <p class="beat-title">船头俯瞰</p>
+                <p class="muted">女主闭眼张开双臂，摄像机从脚下海浪向上拉升，伴随海鸥鸣叫。</p>
+              </div>
+              <span class="chip">00:10-00:22</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">03</span>
+              <div>
+                <p class="beat-title">拥抱与台词</p>
+                <p class="muted">男主从后拥住，低声说“现在相信我了吗”；女主睁眼，风声中喊出“我在飞！”</p>
+              </div>
+              <span class="chip">00:22-00:36</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">04</span>
+              <div>
+                <p class="beat-title">远景定格</p>
+                <p class="muted">镜头拉远展示整艘船切开海面，BGM 提示 {{bgm:抒情弦乐}}，以光晕收尾。</p>
+              </div>
+              <span class="chip">00:36-00:45</span>
+            </div>
+          </div>
+          <footer class="story-actions">
+            <button class="btn ghost">加入生成</button>
+            <button class="btn primary">复制分镜模板</button>
+          </footer>
+        </article>
+
+        <article class="story-card">
+          <header class="story-head">
+            <div>
+              <p class="badge">电视剧 · 古装宫廷</p>
+              <h3>《甄嬛传》 · 滴血验亲</h3>
+              <p class="muted">紧张反转的审判场面，权力斗争浓度高，适合“阴谋拆解/反转”模型训练。</p>
+            </div>
+            <div class="story-meta">
+              <span class="chip">75s</span>
+              <span class="chip">情绪：质疑 → 崩塌</span>
+              <span class="chip">场景 6</span>
+            </div>
+          </header>
+          <div class="story-tags">
+            <span class="pill ghost">宫廷</span>
+            <span class="pill ghost">悬疑</span>
+            <span class="pill ghost">多角色对峙</span>
+            <span class="pill ghost">仪式感道具</span>
+          </div>
+          <div class="story-beats">
+            <div class="beat">
+              <span class="beat-index">01</span>
+              <div>
+                <p class="beat-title">大殿 · 俯拍</p>
+                <p class="muted">众人跪在御前，银盆端上，{{role:太后}} 冷声宣布验亲；鼓点般的心跳声入场。</p>
+              </div>
+              <span class="chip">00:00-00:15</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">02</span>
+              <div>
+                <p class="beat-title">特写 · 滴血融合</p>
+                <p class="muted">鲜血滴入热水，镜头极近拍摄血液散开；{{role:甄嬛}} 盯着水面，手微颤。</p>
+              </div>
+              <span class="chip">00:15-00:32</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">03</span>
+              <div>
+                <p class="beat-title">对峙 · 语言反转</p>
+                <p class="muted">水面未融合，引发嘈杂；甄嬛开口指出“血滴子早被换过”，镜头切到 {{prop:银盆}} 底部暗纹。</p>
+              </div>
+              <span class="chip">00:32-00:55</span>
+            </div>
+            <div class="beat">
+              <span class="beat-index">04</span>
+              <div>
+                <p class="beat-title">势力崩塌</p>
+                <p class="muted">{{role:皇后}} 神情破防，被带走；甄嬛跪谢，旁白提示“真相需要证据链”，留白供模型扩写。</p>
+              </div>
+              <span class="chip">00:55-01:15</span>
+            </div>
+          </div>
+          <footer class="story-actions">
+            <button class="btn ghost">加入生成</button>
+            <button class="btn primary">复制分镜模板</button>
+          </footer>
+        </article>
+      </div>
+    </section>
+
+    <section id="editor" class="section">
+      <div class="section-head">
+        <p class="eyebrow">模块 03</p>
         <h2>模板编辑器（Template Editor）</h2>
         <p class="section-desc">表单变量替换 + 高级 Prompt + 分镜脚本三段式结构，便于逐层细化。</p>
       </div>
@@ -180,7 +391,7 @@
 
     <section id="pipeline" class="section">
       <div class="section-head">
-        <p class="eyebrow">模块 03</p>
+        <p class="eyebrow">模块 04</p>
         <h2>AI 视频生成流程</h2>
         <p class="section-desc">从 Prompt 合成到分镜、配音、BGM、视频合成的完整流水线，当前以占位状态呈现，可直接挂接外部模型。</p>
       </div>
@@ -234,7 +445,7 @@
 
     <section id="dashboard" class="section">
       <div class="section-head">
-        <p class="eyebrow">模块 04</p>
+        <p class="eyebrow">模块 05</p>
         <h2>用户中心</h2>
         <p class="section-desc">覆盖作品、模板、收藏、账户、付费、历史、配额的统一入口。</p>
       </div>
