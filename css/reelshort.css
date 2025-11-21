@@ -243,6 +243,57 @@ main { max-width: 1180px; margin: 32px auto 0; display: flex; flex-direction: co
 }
 .api-name { margin: 0 0 4px; font-weight: 700; }
 
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 10px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full-span { grid-column: 1 / -1; }
+.form-group label { font-weight: 700; font-size: 14px; }
+.input, .textarea {
+  width: 100%;
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 12px;
+  border-radius: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus, .textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,240,255,0.12); }
+.textarea { min-height: 140px; resize: vertical; line-height: 1.6; }
+
+.status-card { display: flex; flex-direction: column; gap: 12px; }
+.status-block {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.status-chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  border: 1px solid var(--border);
+  background: var(--panel-strong);
+  color: var(--muted);
+}
+.status-chip.success { background: var(--success); color: #05060a; border-color: transparent; }
+.status-chip.warning { background: var(--warning); color: #05060a; border-color: transparent; }
+.status-chip.error { background: #ff8b73; color: #05060a; border-color: transparent; }
+.status-chip.ghost { background: transparent; border-style: dashed; }
+.status-link a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.status-error {
+  display: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #ffb4a2;
+  background: rgba(255, 139, 115, 0.08);
+  border: 1px solid rgba(255, 139, 115, 0.35);
+}
+
 .timeline { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
 .timeline li { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: flex-start; }
 .timeline .dot { margin-top: 6px; }
