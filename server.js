@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
+const { chromium } = require('playwright');
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'video_jobs.sqlite');
@@ -10,6 +11,9 @@ const PROMPTS_PATH = path.join(__dirname, 'prompts.json');
 const PORT = process.env.PORT || 4000;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+const OPENAI_API_BASE = process.env.OPENAI_API_BASE || 'https://api.openai.com/v1';
+const ANYTOCOPY_EMAIL = process.env.ANYTOCOPY_EMAIL;
+const ANYTOCOPY_PASSWORD = process.env.ANYTOCOPY_PASSWORD;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -128,17 +132,27 @@ app.use(express.static(__dirname));
 const renderTemplate = (template, variables) =>
   template.replace(/{{\\s*(\\w+)\\s*}}/g, (_, key) => String(variables[key] ?? ''));
 
-const callOpenAI = async (messages) => {
-  if (!OPENAI_API_KEY) return null;
+const resolveAiConfig = (settings = {}) => ({
+  apiKey: settings?.ai?.api_key || settings?.api_key || OPENAI_API_KEY,
+  apiBase: settings?.ai?.api_base || OPENAI_API_BASE,
+  model: settings?.ai?.model || OPENAI_MODEL,
+});
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+const callOpenAI = async (messages, aiConfig = {}) => {
+  const apiKey = aiConfig.apiKey || OPENAI_API_KEY;
+  const apiBase = aiConfig.apiBase || OPENAI_API_BASE;
+  const model = aiConfig.model || OPENAI_MODEL;
+
+  if (!apiKey) return null;
+
+  const response = await fetch(`${apiBase}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
+      model,
       messages,
       temperature: 0.7,
     }),
@@ -154,6 +168,7 @@ const callOpenAI = async (messages) => {
 };
 
 const sanitizeText = (value) => (typeof value === 'string' ? value.replace(/[\\r\\t]+/g, ' ').trim() : '');
+const uniqueList = (items = []) => Array.from(new Set(items.filter(Boolean)));
 
 const mockGenerateDraft = (raw, settings = {}) => {
   const title = raw.title || '我把爆款方法拆成了 10 分钟小任务，真的坚持下来了';
@@ -373,7 +388,7 @@ app.post('/api/manual_raw', async (req, res) => {
   });
 });
 
-const buildDraftWithOpenAI = async (raw, settings = {}) => {
+const buildDraftWithOpenAI = async (raw, settings = {}, aiConfig = {}) => {
   const system = promptPack.system_base;
   const logicPrompt = renderTemplate(promptPack.extract_logic.prompt, {
     title: raw.title || '',
@@ -383,7 +398,7 @@ const buildDraftWithOpenAI = async (raw, settings = {}) => {
   const logicText = await callOpenAI([
     { role: 'system', content: system },
     { role: 'user', content: logicPrompt },
-  ]);
+  ], aiConfig);
   const generatePrompt = renderTemplate(promptPack.generate_draft.prompt, {
     logic_template: logicText,
     core_points: JSON.stringify(raw.core_points || []),
@@ -391,7 +406,7 @@ const buildDraftWithOpenAI = async (raw, settings = {}) => {
   const draftText = await callOpenAI([
     { role: 'system', content: system },
     { role: 'user', content: generatePrompt },
-  ]);
+  ], aiConfig);
   const [draftTitle, ...rest] = draftText.split(/\n+/).filter(Boolean);
   const content = rest.join('\n\n');
   const imagePrompt = renderTemplate(promptPack.image_prompt_gen.prompt, {
@@ -402,7 +417,7 @@ const buildDraftWithOpenAI = async (raw, settings = {}) => {
   const imagePromptText = await callOpenAI([
     { role: 'system', content: system },
     { role: 'user', content: imagePrompt },
-  ]);
+  ], aiConfig);
   let imagePrompts = [];
   try {
     imagePrompts = JSON.parse(imagePromptText);
@@ -421,7 +436,7 @@ const buildDraftWithOpenAI = async (raw, settings = {}) => {
   });
 };
 
-const scoreDraftWithOpenAI = async (draft) => {
+const scoreDraftWithOpenAI = async (draft, aiConfig = {}) => {
   const system = promptPack.system_base;
   const scorePrompt = renderTemplate(promptPack.score_rubric.prompt, {
     title: draft.title || '',
@@ -430,11 +445,11 @@ const scoreDraftWithOpenAI = async (draft) => {
   const scoreText = await callOpenAI([
     { role: 'system', content: system },
     { role: 'user', content: scorePrompt },
-  ]);
+  ], aiConfig);
   return { ok: true, score: JSON.parse(scoreText) };
 };
 
-const rewriteDraftWithOpenAI = async (raw, draft, score, settings) => {
+const rewriteDraftWithOpenAI = async (raw, draft, score, settings, aiConfig = {}) => {
   const system = promptPack.system_base;
   const rewritePrompt = renderTemplate(promptPack.rewrite_focus.prompt, {
     target_total: settings.target_total || 85,
@@ -447,7 +462,7 @@ const rewriteDraftWithOpenAI = async (raw, draft, score, settings) => {
   const rewriteText = await callOpenAI([
     { role: 'system', content: system },
     { role: 'user', content: rewritePrompt },
-  ]);
+  ], aiConfig);
   const [newTitle, ...rest] = rewriteText.split(/\n+/).filter(Boolean);
   return {
     ok: true,
@@ -465,22 +480,25 @@ const rewriteDraftWithOpenAI = async (raw, draft, score, settings) => {
 };
 
 const generateDraft = async (raw, settings) => {
-  if (promptPack && OPENAI_API_KEY) {
-    return buildDraftWithOpenAI(raw, settings);
+  const aiConfig = resolveAiConfig(settings);
+  if (promptPack && aiConfig.apiKey) {
+    return buildDraftWithOpenAI(raw, settings, aiConfig);
   }
   return normalizeDraftResponse(mockGenerateDraft(raw, settings));
 };
 
-const scoreDraft = async (draft) => {
-  if (promptPack && OPENAI_API_KEY) {
-    return scoreDraftWithOpenAI(draft);
+const scoreDraft = async (draft, settings = {}) => {
+  const aiConfig = resolveAiConfig(settings);
+  if (promptPack && aiConfig.apiKey) {
+    return scoreDraftWithOpenAI(draft, aiConfig);
   }
   return normalizeScoreResponse(scoreDraftHeuristic(draft));
 };
 
 const rewriteDraft = async (raw, draft, score, settings) => {
-  if (promptPack && OPENAI_API_KEY) {
-    return rewriteDraftWithOpenAI(raw, draft, score, settings);
+  const aiConfig = resolveAiConfig(settings);
+  if (promptPack && aiConfig.apiKey) {
+    return rewriteDraftWithOpenAI(raw, draft, score, settings, aiConfig);
   }
   return {
     ok: true,
@@ -506,13 +524,13 @@ app.post('/api/generate', async (req, res) => {
 });
 
 app.post('/api/score', async (req, res) => {
-  const { draft } = req.body || {};
+  const { draft, settings = {} } = req.body || {};
   if (!draft) {
     return res.status(400).json({ ok: false, error: 'DRAFT_REQUIRED', message: 'draft is required' });
   }
 
   try {
-    return res.json(await scoreDraft(draft));
+    return res.json(await scoreDraft(draft, settings));
   } catch (err) {
     return res.status(500).json({ ok: false, error: 'SCORE_FAILED', message: err.message });
   }
@@ -528,6 +546,170 @@ app.post('/api/rewrite', async (req, res) => {
     return res.json(await rewriteDraft(raw, draft, score, settings));
   } catch (err) {
     return res.status(500).json({ ok: false, error: 'REWRITE_FAILED', message: err.message });
+  }
+});
+
+const resolveFinalUrl = async (url) => {
+  const response = await fetch(url, {
+    redirect: 'follow',
+    headers: { 'User-Agent': 'Mozilla/5.0 (ElisiBot)' },
+  });
+  return response.url || url;
+};
+
+const fetchHtmlViaJina = async (url) => {
+  const normalized = url.replace(/^https?:\\/\\//, '');
+  const jinaUrl = `https://r.jina.ai/http://${normalized}`;
+  const response = await fetch(jinaUrl);
+  if (!response.ok) {
+    throw new Error(`Jina AI 代理失败 ${response.status}`);
+  }
+  return response.text();
+};
+
+const extractImageUrls = (html) => {
+  const imageRegex = new RegExp("https?://[^\\s\"'<>]+\\.(?:png|jpe?g|webp)", 'gi');
+  const matches = html.match(imageRegex) || [];
+  const prioritized = matches.filter((url) => url.includes('xhscdn.com'));
+  const sorted = prioritized.length ? prioritized : matches;
+  return uniqueList(sorted);
+};
+
+const extractAnyToCopyResults = async (targetUrl) => {
+  if (!ANYTOCOPY_EMAIL || !ANYTOCOPY_PASSWORD) {
+    return { ok: false, error: 'ANYTOCOPY_AUTH_REQUIRED', message: 'AnyToCopy 账号未配置。' };
+  }
+
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    await page.goto('https://www.anytocopy.com/xiaohongshu-image', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1500);
+
+    if ((await page.locator('text=账号密码登录').count()) === 0) {
+      const loginButton = page.getByRole('button', { name: '登录' }).first();
+      if (await loginButton.count()) {
+        await loginButton.click();
+        await page.waitForTimeout(800);
+      }
+    }
+
+    const emailInput = page.locator('input[placeholder*=\"邮箱\"]');
+    const passwordInput = page.locator('input[placeholder*=\"密码\"]');
+    await emailInput.fill(ANYTOCOPY_EMAIL);
+    await passwordInput.fill(ANYTOCOPY_PASSWORD);
+    const modalLoginButton = page.getByRole('button', { name: '登录' }).nth(1);
+    await modalLoginButton.click();
+    await page.locator('text=账号密码登录').first().waitFor({ state: 'detached', timeout: 10000 });
+
+    await page.locator('input[placeholder*=\"小红书\"]').fill(targetUrl);
+    await page.getByRole('button', { name: '开始提取' }).click();
+
+    await page.waitForFunction(() => {
+      const images = Array.from(document.querySelectorAll('img')).map((img) => img.src || '');
+      const textNodes = document.querySelectorAll('textarea, pre, [data-clipboard-text], [class*=\"prose\"], [class*=\"whitespace-pre-wrap\"]');
+      return images.some((src) => src.includes('xhscdn')) || textNodes.length > 0;
+    }, { timeout: 30000 });
+
+    const payload = await page.evaluate(() => {
+      const images = Array.from(document.querySelectorAll('img'))
+        .map((img) => img.src)
+        .filter((src) => src && src.includes('xhscdn'));
+      const texts = Array.from(document.querySelectorAll('textarea, pre, [data-clipboard-text], [class*=\"prose\"], [class*=\"whitespace-pre-wrap\"]'))
+        .map((node) => node.textContent?.trim() || '')
+        .filter(Boolean);
+      return { images, texts };
+    });
+
+    return { ok: true, images: uniqueList(payload.images), texts: payload.texts };
+  } catch (err) {
+    return { ok: false, error: 'ANYTOCOPY_FAILED', message: err.message };
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+};
+
+app.post('/api/xhs', async (req, res) => {
+  const { url, provider } = req.body || {};
+  if (!url) {
+    return res.status(400).json({ ok: false, error: 'URL_REQUIRED', message: 'url is required' });
+  }
+
+  try {
+    if (provider === 'anytocopy') {
+      const payload = await extractAnyToCopyResults(url);
+      if (!payload.ok) {
+        return res.status(502).json(payload);
+      }
+      const filtered = (payload.images || []).slice(0, 12);
+      return res.json({ ok: true, images: filtered, texts: payload.texts || [] });
+    }
+
+    const finalUrl = await resolveFinalUrl(url);
+    let html = await fetchHtmlViaJina(finalUrl);
+    let images = extractImageUrls(html);
+
+    if (!images.length) {
+      const response = await fetch(finalUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (ElisiBot)' },
+      });
+      if (response.ok) {
+        html = await response.text();
+        images = extractImageUrls(html);
+      }
+    }
+
+    const filtered = images.slice(0, 12);
+    if (!filtered.length) {
+      return res.status(502).json({ ok: false, error: 'NO_IMAGES', message: '未识别到图片，请使用手动补充。' });
+    }
+
+    return res.json({ ok: true, images: filtered });
+  } catch (err) {
+    return res.status(502).json({ ok: false, error: 'FETCH_FAILED', message: err.message });
+  }
+});
+
+app.post('/api/ocr', async (req, res) => {
+  const { images = [], settings = {} } = req.body || {};
+  if (!images.length) {
+    return res.status(400).json({ ok: false, error: 'IMAGES_REQUIRED', message: 'images are required' });
+  }
+
+  const aiConfig = resolveAiConfig(settings);
+  if (!aiConfig.apiKey) {
+    return res.json({
+      ok: true,
+      texts: images.map(() => '（AI OCR 未配置，请手动填写识别文本）'),
+      notice: '未检测到 AI Key，已生成占位 OCR 文本。',
+    });
+  }
+
+  try {
+    const texts = [];
+    for (const imageUrl of images) {
+      const prompt = [
+        {
+          role: 'system',
+          content: '你是 OCR 识别助手。请从图片中提取所有可见中文/英文文本，保持原始换行。',
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: '请输出图片中的文字内容。' },
+            { type: 'image_url', image_url: { url: imageUrl } },
+          ],
+        },
+      ];
+      const text = await callOpenAI(prompt, aiConfig);
+      texts.push(text || '');
+    }
+    return res.json({ ok: true, texts, notice: 'OCR 完成' });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'OCR_FAILED', message: err.message });
   }
 });
 
@@ -561,7 +743,7 @@ app.post('/api/run', async (req, res) => {
     let draft = draftPayload.draft;
 
     for (let round = 1; round <= maxRounds; round += 1) {
-      const scorePayload = await scoreDraft(draft);
+      const scorePayload = await scoreDraft(draft, settings);
       if (!scorePayload.ok) {
         return res.status(500).json(scorePayload);
       }
