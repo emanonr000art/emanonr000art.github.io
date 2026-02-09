@@ -259,6 +259,56 @@ pre code {
   font-size: 13px;
 }
 
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.image-item {
+  background: rgba(5, 6, 10, 0.5);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.image-thumb {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+}
+
+.image-thumb img {
+  max-width: 100%;
+  max-height: 140px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.ocr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .inline-inputs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
