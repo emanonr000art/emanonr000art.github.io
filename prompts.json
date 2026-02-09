@@ -1,0 +1,24 @@
+{
+  "version": "v1",
+  "system_base": "你是小红书爆款内容工程专家，擅长拆解爆款结构并用差异化表达复刻。你输出的正文必须适配小红书：不要使用任何Markdown语法，不要用项目符号'-'或'#'标题标记。所有内容必须自然、口语化、有画面感。",
+  "extract_logic": {
+    "name": "extract_logic",
+    "prompt": "任务：拆解下面这篇小红书爆款的爆文结构，输出可复刻的骨架。\n要求：\n1 输出7部分：Attention, Relevance, Empathy, Value, Trust, Reasoning, Action。\n2 每部分输出：核心策略一句话 + 可复刻的写法模板3条 + 原文对应证据（用你自己的话转述，不要原句照抄）。\n3 再输出一份“核心要点清单”：至少8条，后续复刻必须保留。\n输入爆款内容：\n标题：{{title}}\n正文：{{content}}\n标签：{{tags}}\n"
+  },
+  "generate_draft": {
+    "name": "generate_draft",
+    "prompt": "任务：基于已拆解的爆款骨架，生成一篇新的小红书笔记。\n硬性要求：\n1 复刻逻辑一致度至少80%，核心要点必须全部覆盖。\n2 不能逐句照抄，所有小标题、措辞、句式要明显不同。\n3 必须用第一人称个人体验叙述，加入更多具体细节（时间、场景、感受、动作）。\n4 植入Elisi：以“我在用的AI规划/任务/习惯工具”的方式自然带出，说明它如何帮助我把方法拆成可执行步骤或坚持下去。不要写成广告口吻。\n5 输出只包含两段：\nA 标题（1行）\nB 正文（多段，适合小红书分段，允许emoji，但不要Markdown）\n输入：\n爆款骨架：{{logic_template}}\n必须保留的核心要点：{{core_points}}\n"
+  },
+  "score_rubric": {
+    "name": "score_rubric",
+    "prompt": "任务：对下面的小红书笔记进行7维评分，总分100。\n评分维度与说明：\n1 Attention(15)：开头0.1秒抓人、标题/封面承诺强。\n2 Relevance(15)：目标人群明确、痛点对得准。\n3 Empathy(15)：强代入感、像在说“我”。\n4 Value(15)：明确可获得的结果/方法/SOP。\n5 Trust(10)：可信背书、细节、前后对比、真实感。\n6 Reasoning(15)：反常识观点+解释闭环。\n7 Action(15)：明确促使收藏/关注/评论/私信/行动。\n要求输出JSON：\n{\n  \"total\": number,\n  \"dimensions\": {\n    \"attention\": {\"score\": number, \"why\": \"...\", \"fix\": [\"...\",\"...\"]},\n    ...\n  },\n  \"lowest_dimensions\": [\"...\",\"...\"]\n}\n待评分笔记：\n标题：{{title}}\n正文：{{content}}\n"
+  },
+  "rewrite_focus": {
+    "name": "rewrite_focus",
+    "prompt": "任务：对现有笔记进行回炉重写，让总分达到{{target_total}}以上。\n规则：\n1 不改变爆款骨架与核心要点顺序（除非为补足低分维度做局部插入）。\n2 只重点增强这些低分维度：{{focus_dimensions}}。\n3 仍然必须：不使用Markdown，不逐句照抄，保持第一人称真实体验。\n4 Elisi植入保留但更自然：强调它如何帮助拆解目标、安排任务、追踪习惯或提升执行力。\n输出：\nA 标题（1行）\nB 正文（多段）\n输入：\n原稿标题：{{title}}\n原稿正文：{{content}}\n评分报告：{{score_report}}\n核心要点：{{core_points}}\n"
+  },
+  "image_prompt_gen": {
+    "name": "image_prompt_gen",
+    "prompt": "任务：为这篇小红书笔记生成{{image_count}}张“排版+文字图”的图片生成Prompt，用于复刻爆款图的表达。\n要求：\n1 每张图对应笔记中的一个关键段落或关键要点。\n2 风格：小红书爆款排版，干净高级，留白，信息分区清晰。\n3 每张图都要包含明确的中文标题/小字要点。\n4 必须写一句：图片中文字为清晰可读的中文黑体，不出现乱码。\n5 输出格式：严格JSON数组字符串，每个元素包含：{\"scene\":\"...\",\"prompt\":\"...\",\"text_overlay\":[\"...\",\"...\"]}\n输入笔记：\n标题：{{title}}\n正文：{{content}}\n"
+  }
+}

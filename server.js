@@ -6,11 +6,17 @@ const crypto = require('crypto');
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'video_jobs.sqlite');
+const PROMPTS_PATH = path.join(__dirname, 'prompts.json');
 const PORT = process.env.PORT || 4000;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
 const db = new sqlite3.Database(DB_PATH);
+const promptPack = fs.existsSync(PROMPTS_PATH)
+  ? JSON.parse(fs.readFileSync(PROMPTS_PATH, 'utf8'))
+  : null;
 
 db.serialize(() => {
   db.run(`
@@ -119,6 +125,134 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
+const renderTemplate = (template, variables) =>
+  template.replace(/{{\\s*(\\w+)\\s*}}/g, (_, key) => String(variables[key] ?? ''));
+
+const callOpenAI = async (messages) => {
+  if (!OPENAI_API_KEY) return null;
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      messages,
+      temperature: 0.7,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`OpenAI request failed: ${errorText}`);
+  }
+
+  const payload = await response.json();
+  return payload.choices?.[0]?.message?.content?.trim() || '';
+};
+
+const sanitizeText = (value) => (typeof value === 'string' ? value.replace(/[\\r\\t]+/g, ' ').trim() : '');
+
+const mockGenerateDraft = (raw, settings = {}) => {
+  const title = raw.title || '我把爆款方法拆成了 10 分钟小任务，真的坚持下来了';
+  const baseContent = raw.content || raw.text || '';
+  const corePoints = [
+    '拆解方法为小步骤',
+    '先给出结果和感受',
+    '场景化描述',
+    '加入反常识观点',
+    '引导收藏与评论',
+    '加入复盘细节',
+    '强调持续执行',
+    '自然植入 Elisi',
+  ];
+  const paragraphs = [
+    `最近我也被“效率焦虑”折磨得不行，直到把方法拆成每天 10 分钟的小任务，才终于看到变化。`,
+    `我会先在早上 7:30 做一个 10 分钟的“最小动作”，比如把当天要做的 3 件事写出来，然后只选 1 件先完成。`,
+    `反常识的一点是：不是先追求完美，而是先把节奏拉起来，哪怕只做 10 分钟，身体会记住这个节奏。`,
+    `我现在用 Elisi 这种一体化规划工具，把任务、习惯、目标放在同一页，每天只看一个清单，不容易跑偏。`,
+    `如果你也卡在“计划很多但执行不了”，先试一周最小动作，再来评论区告诉我你的卡点。`,
+  ];
+  const content = baseContent ? `${baseContent}\\n\\n${paragraphs.join('\\n\\n')}` : paragraphs.join('\\n\\n');
+  const imageCount = Number(settings.image_count) || 6;
+  const imagePrompts = Array.from({ length: imageCount }).map((_, index) => `排版文字图 ${index + 1}：强调关键步骤与结果对比，中文黑体清晰可读。`);
+
+  return {
+    title,
+    content,
+    image_prompts: imagePrompts,
+    meta: {
+      logic_template: { summary: '爆款骨架复刻 + 个人体验 + 方法拆解 + 行动引导' },
+      core_points: corePoints,
+      elisi_injection_points: ['方法拆解后工具承接', '复盘与提醒'],
+    },
+  };
+};
+
+const scoreDraftHeuristic = (draft) => {
+  const content = `${draft.title}\\n${draft.content}`;
+  const hasNumbers = /\\d/.test(content);
+  const hasCTA = /(收藏|评论|关注|私信)/.test(content);
+  const hasEmotion = /(崩溃|松一口气|终于|焦虑)/.test(content);
+  const lengthFactor = Math.min(1, content.length / 400);
+  const base = 70 + Math.round(lengthFactor * 10);
+  const bump = (flag) => (flag ? 6 : 0);
+  const dimensions = {
+    attention: { score: base + bump(hasNumbers), why: '标题与开头具备一定吸引力', fix: ['加入更强的结果前置', '强化对比感'] },
+    relevance: { score: base, why: '目标人群与痛点匹配', fix: ['补充更具体的场景', '明确适用人群'] },
+    empathy: { score: base + bump(hasEmotion), why: '第一人称叙述具备共鸣', fix: ['补充情绪细节', '加入真实小动作'] },
+    value: { score: base, why: '包含可执行步骤', fix: ['加一个更清晰的 SOP', '增加注意事项'] },
+    trust: { score: base - 8, why: '可信细节不足', fix: ['增加周期/频率', '补充前后对比'] },
+    reasoning: { score: base, why: '有一定解释闭环', fix: ['加入反常识观点', '解释为什么有效'] },
+    action: { score: base + bump(hasCTA), why: '行动引导存在', fix: ['增加收藏引导', '加入评论提问'] },
+  };
+  const total = Math.round(
+    (dimensions.attention.score * 0.15)
+      + (dimensions.relevance.score * 0.15)
+      + (dimensions.empathy.score * 0.15)
+      + (dimensions.value.score * 0.15)
+      + (dimensions.trust.score * 0.1)
+      + (dimensions.reasoning.score * 0.15)
+      + (dimensions.action.score * 0.15)
+  );
+  const sorted = Object.entries(dimensions)
+    .sort(([, a], [, b]) => a.score - b.score)
+    .slice(0, 2)
+    .map(([key]) => key);
+  return { total, dimensions, lowest_dimensions: sorted };
+};
+
+const rewriteDraftHeuristic = (draft, focus = []) => {
+  const additions = [];
+  if (focus.includes('trust')) {
+    additions.push('我给自己设了 14 天的追踪周期，每晚睡前在 Elisi 做一次复盘，能清楚看到哪些动作更有效。');
+  }
+  if (focus.includes('attention')) {
+    additions.push('最让我意外的是，只调整 10 分钟的起步动作，就能把一整天的效率拉回正轨。');
+  }
+  if (focus.includes('action')) {
+    additions.push('如果你也想要我用的模板，评论区打“模板”，我整理给你。');
+  }
+  const content = `${draft.content}\\n\\n${additions.join('\\n\\n')}`.trim();
+  return { ...draft, content };
+};
+
+const normalizeScoreResponse = (score) => ({
+  ok: true,
+  score: {
+    total: score.total,
+    dimensions: score.dimensions,
+    lowest_dimensions: score.lowest_dimensions,
+  },
+});
+
+const normalizeDraftResponse = (draft) => ({
+  ok: true,
+  draft,
+});
+
 app.post('/api/videos', async (req, res) => {
   const {
     script,
@@ -206,6 +340,257 @@ app.get('/api/videos/:jobId', async (req, res) => {
   }
 });
 
+app.post('/api/parse', async (req, res) => {
+  const { url } = req.body || {};
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ ok: false, error: 'INVALID_URL', message: 'url is required', fallback: { allow_manual_input: true } });
+  }
+  return res.status(502).json({
+    ok: false,
+    error: 'PARSE_FAILED',
+    message: '当前解析服务未接入或被反爬拦截，请使用手动输入。',
+    fallback: { allow_manual_input: true },
+  });
+});
+
+app.post('/api/manual_raw', async (req, res) => {
+  const { title, content, text, images = [] } = req.body || {};
+  const mergedContent = content || text;
+  if (!mergedContent || typeof mergedContent !== 'string') {
+    return res.status(400).json({ ok: false, error: 'CONTENT_REQUIRED', message: 'content is required' });
+  }
+  return res.json({
+    ok: true,
+    raw: {
+      source_url: null,
+      title: sanitizeText(title),
+      text: sanitizeText(mergedContent),
+      paragraphs: sanitizeText(mergedContent).split(/\n+/).filter(Boolean),
+      tags: [],
+      images,
+      video: null,
+    },
+  });
+});
+
+const buildDraftWithOpenAI = async (raw, settings = {}) => {
+  const system = promptPack.system_base;
+  const logicPrompt = renderTemplate(promptPack.extract_logic.prompt, {
+    title: raw.title || '',
+    content: raw.text || raw.content || '',
+    tags: (raw.tags || []).join(' '),
+  });
+  const logicText = await callOpenAI([
+    { role: 'system', content: system },
+    { role: 'user', content: logicPrompt },
+  ]);
+  const generatePrompt = renderTemplate(promptPack.generate_draft.prompt, {
+    logic_template: logicText,
+    core_points: JSON.stringify(raw.core_points || []),
+  });
+  const draftText = await callOpenAI([
+    { role: 'system', content: system },
+    { role: 'user', content: generatePrompt },
+  ]);
+  const [draftTitle, ...rest] = draftText.split(/\n+/).filter(Boolean);
+  const content = rest.join('\n\n');
+  const imagePrompt = renderTemplate(promptPack.image_prompt_gen.prompt, {
+    image_count: settings.image_count || 6,
+    title: draftTitle,
+    content,
+  });
+  const imagePromptText = await callOpenAI([
+    { role: 'system', content: system },
+    { role: 'user', content: imagePrompt },
+  ]);
+  let imagePrompts = [];
+  try {
+    imagePrompts = JSON.parse(imagePromptText);
+  } catch {
+    imagePrompts = [imagePromptText];
+  }
+  return normalizeDraftResponse({
+    title: draftTitle || raw.title || '未命名标题',
+    content: content || draftText,
+    image_prompts: imagePrompts,
+    meta: {
+      logic_template: logicText,
+      core_points: raw.core_points || [],
+      elisi_injection_points: ['工具植入', '复盘提醒'],
+    },
+  });
+};
+
+const scoreDraftWithOpenAI = async (draft) => {
+  const system = promptPack.system_base;
+  const scorePrompt = renderTemplate(promptPack.score_rubric.prompt, {
+    title: draft.title || '',
+    content: draft.content || '',
+  });
+  const scoreText = await callOpenAI([
+    { role: 'system', content: system },
+    { role: 'user', content: scorePrompt },
+  ]);
+  return { ok: true, score: JSON.parse(scoreText) };
+};
+
+const rewriteDraftWithOpenAI = async (raw, draft, score, settings) => {
+  const system = promptPack.system_base;
+  const rewritePrompt = renderTemplate(promptPack.rewrite_focus.prompt, {
+    target_total: settings.target_total || 85,
+    focus_dimensions: (settings.focus_dimensions || []).join(', '),
+    title: draft.title || '',
+    content: draft.content || '',
+    score_report: JSON.stringify(score),
+    core_points: JSON.stringify(raw?.core_points || []),
+  });
+  const rewriteText = await callOpenAI([
+    { role: 'system', content: system },
+    { role: 'user', content: rewritePrompt },
+  ]);
+  const [newTitle, ...rest] = rewriteText.split(/\n+/).filter(Boolean);
+  return {
+    ok: true,
+    draft: {
+      title: newTitle || draft.title,
+      content: rest.join('\n\n') || draft.content,
+      image_prompts: draft.image_prompts || [],
+      meta: draft.meta || {},
+    },
+    change_log: {
+      focus_dimensions: settings.focus_dimensions || [],
+      changes: ['已根据低分维度增强内容'],
+    },
+  };
+};
+
+const generateDraft = async (raw, settings) => {
+  if (promptPack && OPENAI_API_KEY) {
+    return buildDraftWithOpenAI(raw, settings);
+  }
+  return normalizeDraftResponse(mockGenerateDraft(raw, settings));
+};
+
+const scoreDraft = async (draft) => {
+  if (promptPack && OPENAI_API_KEY) {
+    return scoreDraftWithOpenAI(draft);
+  }
+  return normalizeScoreResponse(scoreDraftHeuristic(draft));
+};
+
+const rewriteDraft = async (raw, draft, score, settings) => {
+  if (promptPack && OPENAI_API_KEY) {
+    return rewriteDraftWithOpenAI(raw, draft, score, settings);
+  }
+  return {
+    ok: true,
+    draft: rewriteDraftHeuristic(draft, settings.focus_dimensions || []),
+    change_log: {
+      focus_dimensions: settings.focus_dimensions || [],
+      changes: ['添加可信细节与行动引导'],
+    },
+  };
+};
+
+app.post('/api/generate', async (req, res) => {
+  const { raw, settings = {} } = req.body || {};
+  if (!raw) {
+    return res.status(400).json({ ok: false, error: 'RAW_REQUIRED', message: 'raw is required' });
+  }
+
+  try {
+    return res.json(await generateDraft(raw, settings));
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'GENERATE_FAILED', message: err.message });
+  }
+});
+
+app.post('/api/score', async (req, res) => {
+  const { draft } = req.body || {};
+  if (!draft) {
+    return res.status(400).json({ ok: false, error: 'DRAFT_REQUIRED', message: 'draft is required' });
+  }
+
+  try {
+    return res.json(await scoreDraft(draft));
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'SCORE_FAILED', message: err.message });
+  }
+});
+
+app.post('/api/rewrite', async (req, res) => {
+  const { raw, draft, score, settings = {} } = req.body || {};
+  if (!draft || !score) {
+    return res.status(400).json({ ok: false, error: 'INPUT_REQUIRED', message: 'draft and score are required' });
+  }
+
+  try {
+    return res.json(await rewriteDraft(raw, draft, score, settings));
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'REWRITE_FAILED', message: err.message });
+  }
+});
+
+app.post('/api/run', async (req, res) => {
+  const { url, raw, settings = {}, loop = {} } = req.body || {};
+  const threshold = loop.threshold || 85;
+  const maxRounds = loop.max_rounds || 3;
+
+  let resolvedRaw = raw;
+
+  if (!resolvedRaw && url) {
+    return res.status(502).json({
+      ok: false,
+      error: 'PARSE_FAILED',
+      message: '当前解析服务未接入，请使用手动输入。',
+      fallback: { allow_manual_input: true },
+    });
+  }
+
+  if (!resolvedRaw) {
+    return res.status(400).json({ ok: false, error: 'RAW_REQUIRED', message: 'raw or url is required' });
+  }
+
+  try {
+    const rounds = [];
+    let draftPayload = await generateDraft(resolvedRaw, settings);
+    if (!draftPayload.ok) {
+      return res.status(500).json(draftPayload);
+    }
+
+    let draft = draftPayload.draft;
+
+    for (let round = 1; round <= maxRounds; round += 1) {
+      const scorePayload = await scoreDraft(draft);
+      if (!scorePayload.ok) {
+        return res.status(500).json(scorePayload);
+      }
+
+      rounds.push({ round, total: scorePayload.score.total, draft, score: scorePayload.score });
+
+      if (scorePayload.score.total >= threshold) {
+        return res.json({ ok: true, final: draft, rounds });
+      }
+
+      const focusDimensions = scorePayload.score.lowest_dimensions?.slice(0, 2) || ['attention'];
+      const rewritePayload = await rewriteDraft(resolvedRaw, draft, scorePayload.score, {
+        focus_dimensions: focusDimensions,
+        target_total: threshold,
+        max_changes: 'bounded',
+      });
+
+      if (!rewritePayload.ok) {
+        return res.status(500).json(rewritePayload);
+      }
+
+      draft = rewritePayload.draft;
+    }
+
+    return res.json({ ok: true, final: draft, rounds });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: 'RUN_FAILED', message: err.message });
+  }
+});
 const mapProviderStatusToDb = (status) => {
   if (status === 'succeeded') return 'succeeded';
   if (status === 'failed') return 'failed';

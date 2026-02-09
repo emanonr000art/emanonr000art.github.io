@@ -78,6 +78,23 @@ main { max-width: 1180px; margin: 32px auto 0; display: flex; flex-direction: co
   box-shadow: var(--shadow);
 }
 
+.hero-compact {
+  grid-template-columns: 1fr;
+  align-items: center;
+}
+
+.hero-compact .hero-body { max-width: 720px; }
+
+.label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.small-note { font-size: 12px; line-height: 1.6; }
+
 .hero-body h1 { margin: 6px 0 12px; font-size: clamp(28px, 5vw, 42px); line-height: 1.2; }
 .eyebrow {
   color: var(--accent);
@@ -194,6 +211,63 @@ main { max-width: 1180px; margin: 32px auto 0; display: flex; flex-direction: co
 .list li + li { margin-top: 4px; }
 
 .pill-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+.code-block {
+  background: rgba(5, 6, 10, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #d9e6ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+code {
+  font-family: "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+.input,
+.select,
+.textarea {
+  background: rgba(5, 6, 10, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.textarea { resize: vertical; min-height: 140px; }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inline-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.copy-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; }
+.prompt-list { display: flex; flex-direction: column; gap: 12px; }
+.prompt-item { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
 
 .pipeline { display: flex; flex-direction: column; gap: 12px; }
 .step {
@@ -322,4 +396,14 @@ main { max-width: 1180px; margin: 32px auto 0; display: flex; flex-direction: co
   body { padding: 18px 14px 36px; }
   .nav { justify-content: flex-end; }
   .hero, .section { padding: 14px; }
+}
+.hero-compact { grid-template-columns: 1fr; }
+.hero-compact .hero-body { max-width: 720px; }
+
+.label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 13px;
 }
