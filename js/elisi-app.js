@@ -129,7 +129,7 @@ const handleFetchImages = async () => {
     const response = await fetch('/api/xhs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, provider: 'anytocopy' }),
     });
     const data = await response.json();
     if (!response.ok || !data.ok) {

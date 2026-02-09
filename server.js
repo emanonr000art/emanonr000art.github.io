@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const crypto = require('crypto');
+const { chromium } = require('playwright');
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'video_jobs.sqlite');
@@ -11,6 +12,8 @@ const PORT = process.env.PORT || 4000;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 const OPENAI_API_BASE = process.env.OPENAI_API_BASE || 'https://api.openai.com/v1';
+const ANYTOCOPY_EMAIL = process.env.ANYTOCOPY_EMAIL;
+const ANYTOCOPY_PASSWORD = process.env.ANYTOCOPY_PASSWORD;
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 
@@ -572,13 +575,79 @@ const extractImageUrls = (html) => {
   return uniqueList(sorted);
 };
 
+const extractAnyToCopyResults = async (targetUrl) => {
+  if (!ANYTOCOPY_EMAIL || !ANYTOCOPY_PASSWORD) {
+    return { ok: false, error: 'ANYTOCOPY_AUTH_REQUIRED', message: 'AnyToCopy 账号未配置。' };
+  }
+
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
+    await page.goto('https://www.anytocopy.com/xiaohongshu-image', { waitUntil: 'networkidle' });
+    await page.waitForTimeout(1500);
+
+    if ((await page.locator('text=账号密码登录').count()) === 0) {
+      const loginButton = page.getByRole('button', { name: '登录' }).first();
+      if (await loginButton.count()) {
+        await loginButton.click();
+        await page.waitForTimeout(800);
+      }
+    }
+
+    const emailInput = page.locator('input[placeholder*=\"邮箱\"]');
+    const passwordInput = page.locator('input[placeholder*=\"密码\"]');
+    await emailInput.fill(ANYTOCOPY_EMAIL);
+    await passwordInput.fill(ANYTOCOPY_PASSWORD);
+    const modalLoginButton = page.getByRole('button', { name: '登录' }).nth(1);
+    await modalLoginButton.click();
+    await page.locator('text=账号密码登录').first().waitFor({ state: 'detached', timeout: 10000 });
+
+    await page.locator('input[placeholder*=\"小红书\"]').fill(targetUrl);
+    await page.getByRole('button', { name: '开始提取' }).click();
+
+    await page.waitForFunction(() => {
+      const images = Array.from(document.querySelectorAll('img')).map((img) => img.src || '');
+      const textNodes = document.querySelectorAll('textarea, pre, [data-clipboard-text], [class*=\"prose\"], [class*=\"whitespace-pre-wrap\"]');
+      return images.some((src) => src.includes('xhscdn')) || textNodes.length > 0;
+    }, { timeout: 30000 });
+
+    const payload = await page.evaluate(() => {
+      const images = Array.from(document.querySelectorAll('img'))
+        .map((img) => img.src)
+        .filter((src) => src && src.includes('xhscdn'));
+      const texts = Array.from(document.querySelectorAll('textarea, pre, [data-clipboard-text], [class*=\"prose\"], [class*=\"whitespace-pre-wrap\"]'))
+        .map((node) => node.textContent?.trim() || '')
+        .filter(Boolean);
+      return { images, texts };
+    });
+
+    return { ok: true, images: uniqueList(payload.images), texts: payload.texts };
+  } catch (err) {
+    return { ok: false, error: 'ANYTOCOPY_FAILED', message: err.message };
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+};
+
 app.post('/api/xhs', async (req, res) => {
-  const { url } = req.body || {};
+  const { url, provider } = req.body || {};
   if (!url) {
     return res.status(400).json({ ok: false, error: 'URL_REQUIRED', message: 'url is required' });
   }
 
   try {
+    if (provider === 'anytocopy') {
+      const payload = await extractAnyToCopyResults(url);
+      if (!payload.ok) {
+        return res.status(502).json(payload);
+      }
+      const filtered = (payload.images || []).slice(0, 12);
+      return res.json({ ok: true, images: filtered, texts: payload.texts || [] });
+    }
+
     const finalUrl = await resolveFinalUrl(url);
     let html = await fetchHtmlViaJina(finalUrl);
     let images = extractImageUrls(html);
