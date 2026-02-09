@@ -546,6 +546,32 @@ app.post('/api/rewrite', async (req, res) => {
   }
 });
 
+const resolveFinalUrl = async (url) => {
+  const response = await fetch(url, {
+    redirect: 'follow',
+    headers: { 'User-Agent': 'Mozilla/5.0 (ElisiBot)' },
+  });
+  return response.url || url;
+};
+
+const fetchHtmlViaJina = async (url) => {
+  const normalized = url.replace(/^https?:\\/\\//, '');
+  const jinaUrl = `https://r.jina.ai/http://${normalized}`;
+  const response = await fetch(jinaUrl);
+  if (!response.ok) {
+    throw new Error(`Jina AI 代理失败 ${response.status}`);
+  }
+  return response.text();
+};
+
+const extractImageUrls = (html) => {
+  const imageRegex = new RegExp("https?://[^\\s\"'<>]+\\.(?:png|jpe?g|webp)", 'gi');
+  const matches = html.match(imageRegex) || [];
+  const prioritized = matches.filter((url) => url.includes('xhscdn.com'));
+  const sorted = prioritized.length ? prioritized : matches;
+  return uniqueList(sorted);
+};
+
 app.post('/api/xhs', async (req, res) => {
   const { url } = req.body || {};
   if (!url) {
@@ -553,16 +579,25 @@ app.post('/api/xhs', async (req, res) => {
   }
 
   try {
-    const response = await fetch(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (ElisiBot)' },
-    });
-    if (!response.ok) {
-      throw new Error(`无法访问链接 ${response.status}`);
+    const finalUrl = await resolveFinalUrl(url);
+    let html = await fetchHtmlViaJina(finalUrl);
+    let images = extractImageUrls(html);
+
+    if (!images.length) {
+      const response = await fetch(finalUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (ElisiBot)' },
+      });
+      if (response.ok) {
+        html = await response.text();
+        images = extractImageUrls(html);
+      }
     }
-    const html = await response.text();
-    const imageRegex = new RegExp("https?://[^\\s\"'<>]+\\.(?:png|jpe?g|webp)", 'gi');
-    const imageMatches = html.match(imageRegex) || [];
-    const filtered = uniqueList(imageMatches).slice(0, 12);
+
+    const filtered = images.slice(0, 12);
+    if (!filtered.length) {
+      return res.status(502).json({ ok: false, error: 'NO_IMAGES', message: '未识别到图片，请使用手动补充。' });
+    }
+
     return res.json({ ok: true, images: filtered });
   } catch (err) {
     return res.status(502).json({ ok: false, error: 'FETCH_FAILED', message: err.message });
