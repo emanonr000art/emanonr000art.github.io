@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elisi 小红书复刻系统</title>
-  <meta name="description" content="小红书爆款复刻生成器：输入链接或手动内容，输出标题、正文与图片 Prompt。">
+  <meta name="description" content="小红书爆款复刻生成器：链接提取图片、OCR 识别、Elisi 重写 Markdown，输出可编辑卡片。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -16,11 +16,13 @@
       <span class="logo">🧭</span>
       <div class="brand-text">
         <strong>Elisi 复刻系统</strong>
-        <small>从零重构 · 可直接跑通</small>
+        <small>从链接到卡片的完整链路</small>
       </div>
     </div>
     <nav class="nav">
       <a href="/">返回首页</a>
+      <a href="#input">开始提取</a>
+      <a href="#rewrite">AI 配置</a>
     </nav>
   </header>
 
@@ -28,30 +30,61 @@
     <section class="hero hero-compact">
       <div class="hero-body">
         <p class="eyebrow">最小可用</p>
-        <h1>输入爆款链接或粘贴内容，立即生成复刻文案</h1>
-        <p class="lede">生成标题、正文、图片 Prompt，并自动评分与回炉。</p>
+        <h1>输入爆款链接或截图，立即生成复刻卡片</h1>
+        <p class="lede">访问链接提取图片、OCR 识别文本、Elisi 重写为 Markdown 并生成卡片。</p>
       </div>
     </section>
 
-    <section class="section">
+    <section id="input" class="section">
       <div class="section-head">
-        <p class="eyebrow">输入区</p>
-        <h2>链接或手动内容</h2>
+        <p class="eyebrow">素材输入</p>
+        <h2>链接访问 + 手动补充</h2>
       </div>
       <div class="grid two">
         <article class="card">
-          <label class="label">爆款链接</label>
+          <label class="label">小红书链接</label>
           <input class="input" id="urlInput" placeholder="https://www.xiaohongshu.com/explore/xxxx" />
-          <label class="toggle">
-            <input type="checkbox" id="manualToggle" />
-            使用手动输入
-          </label>
-          <label class="label">标题（可选）</label>
-          <input class="input" id="manualTitle" placeholder="可留空" />
-          <label class="label">正文</label>
-          <textarea class="textarea" id="manualContent" rows="8" placeholder="粘贴原始正文"></textarea>
+          <button class="btn primary" id="fetchButton">抓取图片</button>
+          <p class="muted small-note">抓取失败时可使用手动图片地址或上传截图。</p>
         </article>
+        <article class="card">
+          <label class="label">手动图片地址（每行一个）</label>
+          <textarea class="textarea" id="manualImages" rows="6" placeholder="https://...jpg"></textarea>
+          <label class="label">上传截图（可选）</label>
+          <input class="input" type="file" id="imageUpload" multiple accept="image/*" />
+        </article>
+      </div>
+      <div class="card" style="margin-top: 16px;">
+        <label class="label">已提取图片</label>
+        <div id="imagesContainer" class="image-grid"></div>
+      </div>
+    </section>
 
+    <section id="ocr" class="section">
+      <div class="section-head">
+        <p class="eyebrow">OCR</p>
+        <h2>图片内容识别</h2>
+      </div>
+      <div class="grid two">
+        <article class="card">
+          <p class="muted">识别图片内文字，结果可直接编辑。</p>
+          <button class="btn primary" id="ocrButton">执行 OCR</button>
+          <p class="muted" id="ocrStatus">等待执行</p>
+        </article>
+        <article class="card">
+          <label class="label">OCR 输出</label>
+          <div id="ocrResults" class="ocr-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="rewrite" class="section">
+      <div class="section-head">
+        <p class="eyebrow">Elisi 重写</p>
+        <h2>生成 Markdown 文本</h2>
+        <p class="section-desc">支持自定义 OpenAI 兼容 Key/Model，解决无法调用 AI 的问题。</p>
+      </div>
+      <div class="grid two">
         <article class="card">
           <label class="label">差异化程度</label>
           <select class="select" id="diffLevel">
@@ -71,59 +104,34 @@
             <option value="5">5</option>
             <option value="6" selected>6</option>
           </select>
-          <label class="label">阈值 / 最大回炉轮次</label>
-          <div class="inline-inputs">
-            <input class="input" id="scoreThreshold" type="number" value="85" />
-            <input class="input" id="maxRounds" type="number" value="3" />
-          </div>
-          <button class="btn primary block" id="runButton">开始生成</button>
+        </article>
+        <article class="card">
+          <label class="label">AI Key（OpenAI 兼容）</label>
+          <input class="input" id="apiKeyInput" placeholder="sk-..." />
+          <label class="label">API Base（可选）</label>
+          <input class="input" id="apiBaseInput" placeholder="https://api.openai.com/v1" />
+          <label class="label">模型</label>
+          <input class="input" id="apiModelInput" placeholder="gpt-4o-mini" />
+          <button class="btn primary block" id="rewriteButton">生成 Markdown</button>
           <p class="muted" id="statusText">等待输入</p>
         </article>
       </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <p class="eyebrow">过程</p>
-        <h2>回炉轮次</h2>
-      </div>
-      <div id="roundsContainer" class="grid three"></div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <p class="eyebrow">输出区</p>
-        <h2>标题、正文、图片 Prompt</h2>
-      </div>
-      <div class="grid two">
-        <article class="card">
-          <div class="copy-row">
-            <div>
-              <label class="label">标题</label>
-              <p id="resultTitle">—</p>
-            </div>
-            <button class="btn ghost" data-copy="title">复制标题</button>
-          </div>
-          <div class="copy-row">
-            <div style="flex: 1;">
-              <label class="label">正文</label>
-              <pre class="code-block" id="resultContent">—</pre>
-            </div>
-            <button class="btn ghost" data-copy="content">复制正文</button>
-          </div>
-        </article>
-        <article class="card">
-          <div class="copy-row">
-            <label class="label">图片 Prompts</label>
-            <button class="btn ghost" data-copy="prompts">一键复制</button>
-          </div>
-          <div id="promptList" class="prompt-list"></div>
-        </article>
-      </div>
       <article class="card" style="margin-top: 16px;">
-        <label class="label">评分报告</label>
-        <pre class="code-block" id="scoreReport">—</pre>
+        <label class="label">Markdown 输出</label>
+        <textarea class="textarea" id="markdownOutput" rows="10" placeholder="生成结果将显示在这里"></textarea>
       </article>
+    </section>
+
+    <section id="cards" class="section">
+      <div class="section-head">
+        <p class="eyebrow">卡片</p>
+        <h2>根据 Markdown 生成卡片</h2>
+      </div>
+      <div class="cta-row">
+        <button class="btn primary" id="buildCardsButton">生成卡片</button>
+        <button class="btn ghost" id="downloadAllButton">下载全部卡片</button>
+      </div>
+      <div id="cardsContainer" class="grid three"></div>
     </section>
   </main>
 
