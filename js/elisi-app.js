@@ -1,169 +1,310 @@
 const byId = (id) => document.getElementById(id);
 
 const state = {
-  final: null,
-  rounds: [],
-  score: null,
+  images: [],
+  ocrTexts: [],
+  markdown: '',
+  cards: [],
 };
 
-const runButton = byId('runButton');
-const statusText = byId('statusText');
-const manualToggle = byId('manualToggle');
 const urlInput = byId('urlInput');
-const manualTitle = byId('manualTitle');
-const manualContent = byId('manualContent');
+const fetchButton = byId('fetchButton');
+const manualImages = byId('manualImages');
+const imageUpload = byId('imageUpload');
+const imagesContainer = byId('imagesContainer');
+const ocrButton = byId('ocrButton');
+const ocrStatus = byId('ocrStatus');
+const ocrResults = byId('ocrResults');
+const statusText = byId('statusText');
+const rewriteButton = byId('rewriteButton');
+const markdownOutput = byId('markdownOutput');
+const buildCardsButton = byId('buildCardsButton');
+const cardsContainer = byId('cardsContainer');
+const downloadAllButton = byId('downloadAllButton');
 
-const renderRounds = () => {
-  const container = byId('roundsContainer');
-  container.innerHTML = '';
-  if (!state.rounds.length) {
-    container.innerHTML = '<article class="card"><p class="muted">暂无轮次</p></article>';
-    return;
-  }
+const diffLevel = byId('diffLevel');
+const elisiStrength = byId('elisiStrength');
+const imageCount = byId('imageCount');
+const apiKeyInput = byId('apiKeyInput');
+const apiBaseInput = byId('apiBaseInput');
+const apiModelInput = byId('apiModelInput');
 
-  state.rounds.forEach((round) => {
-    const card = document.createElement('article');
-    card.className = 'card';
-    const lowest = round.score?.lowest_dimensions?.join(', ') || '—';
-    card.innerHTML = `
-      <p class="badge">Round ${round.round}</p>
-      <h3>总分：${round.total}</h3>
-      <p class="muted">最低维度：${lowest}</p>
-    `;
-    container.appendChild(card);
-  });
-};
-
-const renderOutput = () => {
-  byId('resultTitle').textContent = state.final?.title || '—';
-  byId('resultContent').textContent = state.final?.content || '—';
-  byId('scoreReport').textContent = state.score ? JSON.stringify(state.score, null, 2) : '—';
-
-  const promptList = byId('promptList');
-  promptList.innerHTML = '';
-  const prompts = state.final?.image_prompts || [];
-  if (!prompts.length) {
-    promptList.innerHTML = '<p class="muted">暂无图片 Prompt</p>';
-    return;
-  }
-  prompts.forEach((prompt, index) => {
-    const item = document.createElement('div');
-    item.className = 'prompt-item';
-    item.innerHTML = `
-      <div>
-        <p class="badge">Prompt ${index + 1}</p>
-        <pre class="code-block">${typeof prompt === 'string' ? prompt : JSON.stringify(prompt, null, 2)}</pre>
-      </div>
-      <button class="btn ghost" data-copy="prompt-${index}">复制</button>
-    `;
-    promptList.appendChild(item);
-  });
-};
+const uniqueList = (list) => Array.from(new Set(list.filter(Boolean)));
 
 const setStatus = (message) => {
-  statusText.textContent = message;
+  if (statusText) statusText.textContent = message;
+};
+
+const renderImages = () => {
+  imagesContainer.innerHTML = '';
+  if (!state.images.length) {
+    imagesContainer.innerHTML = '<p class="muted">暂无图片</p>';
+    return;
+  }
+
+  state.images.forEach((url, index) => {
+    const item = document.createElement('div');
+    item.className = 'image-item';
+    item.innerHTML = `
+      <div class="image-thumb">
+        <img src="${url}" alt="image-${index + 1}" />
+      </div>
+      <p class="muted">${url.startsWith('data:') ? '上传截图' : url}</p>
+    `;
+    imagesContainer.appendChild(item);
+  });
+};
+
+const renderOcrResults = () => {
+  ocrResults.innerHTML = '';
+  if (!state.ocrTexts.length) {
+    ocrResults.innerHTML = '<p class="muted">暂无 OCR 结果</p>';
+    return;
+  }
+
+  state.ocrTexts.forEach((text, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ocr-item';
+    wrapper.innerHTML = `
+      <label class="label">图片 ${index + 1}</label>
+      <textarea class="textarea" data-ocr-index="${index}" rows="4">${text}</textarea>
+    `;
+    ocrResults.appendChild(wrapper);
+  });
+};
+
+const renderCards = () => {
+  cardsContainer.innerHTML = '';
+  if (!state.cards.length) {
+    cardsContainer.innerHTML = '<article class="card"><p class="muted">暂无卡片</p></article>';
+    return;
+  }
+
+  state.cards.forEach((card, index) => {
+    const item = document.createElement('article');
+    item.className = 'card card-editor';
+    item.innerHTML = `
+      <p class="badge">Card ${index + 1}</p>
+      <textarea class="textarea" data-card-index="${index}" rows="6">${card}</textarea>
+      <div class="card-actions">
+        <button class="btn ghost" data-download-card="${index}">下载该卡片</button>
+      </div>
+    `;
+    cardsContainer.appendChild(item);
+  });
 };
 
 const gatherSettings = () => ({
-  language: 'zh',
-  diff_level: byId('diffLevel').value,
-  elisi_strength: byId('elisiStrength').value,
-  image_count: Number(byId('imageCount').value),
-  xhs_no_markdown: true,
+  diff_level: diffLevel?.value || 'medium',
+  elisi_strength: elisiStrength?.value || 'soft',
+  image_count: Number(imageCount?.value || 6),
+  ai: {
+    api_key: apiKeyInput?.value.trim(),
+    api_base: apiBaseInput?.value.trim(),
+    model: apiModelInput?.value.trim(),
+  },
 });
 
-const gatherLoop = () => ({
-  threshold: Number(byId('scoreThreshold').value) || 85,
-  max_rounds: Number(byId('maxRounds').value) || 3,
-});
-
-const buildPayload = () => {
-  const manualMode = manualToggle.checked;
-  const url = urlInput.value.trim();
-  const raw = manualMode
-    ? {
-        title: manualTitle.value.trim(),
-        text: manualContent.value.trim(),
-      }
-    : null;
-
-  return {
-    url: manualMode ? null : url,
-    raw: manualMode ? raw : null,
-    settings: gatherSettings(),
-    loop: gatherLoop(),
-  };
+const collectManualImages = () => {
+  const manualList = manualImages.value
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  state.images = uniqueList([...state.images, ...manualList]);
 };
 
-const runPipeline = async () => {
-  setStatus('正在生成...');
-  runButton.disabled = true;
+const handleFetchImages = async () => {
+  const url = urlInput.value.trim();
+  collectManualImages();
+
+  if (!url) {
+    renderImages();
+    return;
+  }
+
+  fetchButton.disabled = true;
+  setStatus('正在抓取图片...');
 
   try {
-    const payload = buildPayload();
-    if (!payload.url && !payload.raw?.text) {
-      setStatus('请填写链接或手动内容');
-      return;
+    const response = await fetch('/api/xhs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || '抓取失败');
     }
+    state.images = uniqueList([...state.images, ...data.images]);
+    setStatus('抓取完成');
+  } catch (error) {
+    setStatus(error.message || '无法抓取链接，已保留手动图片');
+  } finally {
+    fetchButton.disabled = false;
+    renderImages();
+  }
+};
 
+const handleUpload = () => {
+  const files = Array.from(imageUpload.files || []);
+  if (!files.length) return;
+
+  files.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      state.images = uniqueList([...state.images, event.target.result]);
+      renderImages();
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+const runOcr = async () => {
+  collectManualImages();
+  if (!state.images.length) {
+    ocrStatus.textContent = '请先添加图片';
+    renderImages();
+    return;
+  }
+
+  ocrButton.disabled = true;
+  ocrStatus.textContent = 'OCR 处理中...';
+
+  try {
+    const response = await fetch('/api/ocr', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ images: state.images, settings: gatherSettings() }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || 'OCR 失败');
+    }
+    state.ocrTexts = data.texts || [];
+    ocrStatus.textContent = data.notice || 'OCR 完成';
+  } catch (error) {
+    ocrStatus.textContent = error.message || 'OCR 无法完成';
+  } finally {
+    ocrButton.disabled = false;
+    renderOcrResults();
+  }
+};
+
+const buildMarkdown = (draft) => {
+  const title = draft?.title || '未命名标题';
+  const content = draft?.content || '';
+  const prompts = draft?.image_prompts || [];
+  const promptBlock = prompts.length
+    ? `\n\n## 图片卡片提示\n${prompts.map((prompt, index) => `- ${index + 1}. ${prompt}`).join('\n')}`
+    : '';
+
+  return `# ${title}\n\n${content}${promptBlock}`.trim();
+};
+
+const runRewrite = async () => {
+  const combinedOcr = Array.from(document.querySelectorAll('[data-ocr-index]'))
+    .map((node) => node.value.trim())
+    .filter(Boolean)
+    .join('\n\n');
+
+  if (!combinedOcr) {
+    setStatus('请先完成 OCR 或手动补充文本');
+    return;
+  }
+
+  rewriteButton.disabled = true;
+  setStatus('正在生成 Markdown...');
+
+  try {
     const response = await fetch('/api/run', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        raw: { text: combinedOcr },
+        settings: gatherSettings(),
+        loop: { threshold: 85, max_rounds: 2 },
+      }),
     });
-
-    if (!response.ok) {
-      throw new Error(`接口错误 ${response.status}`);
-    }
-
     const data = await response.json();
-    if (!data.ok) {
-      setStatus(data.message || data.error || '生成失败');
-      return;
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || '生成失败');
     }
-
-    state.final = data.final;
-    state.rounds = data.rounds || [];
-    state.score = state.rounds[state.rounds.length - 1]?.score || null;
-    renderRounds();
-    renderOutput();
+    state.markdown = buildMarkdown(data.final);
+    markdownOutput.value = state.markdown;
     setStatus('生成完成');
   } catch (error) {
-    setStatus(error.message || '无法连接接口，请确认已运行 node server.js');
+    setStatus(error.message || '无法调用 AI');
   } finally {
-    runButton.disabled = false;
+    rewriteButton.disabled = false;
   }
 };
 
-const copyText = async (text) => {
-  if (!text) return;
-  await navigator.clipboard.writeText(text);
+const splitMarkdownToCards = (markdown) => {
+  return markdown
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean);
 };
 
-manualToggle.addEventListener('change', () => {
-  const isManual = manualToggle.checked;
-  urlInput.disabled = isManual;
-  manualTitle.disabled = !isManual;
-  manualContent.disabled = !isManual;
+const buildCards = () => {
+  const markdown = markdownOutput.value.trim();
+  if (!markdown) {
+    setStatus('请先生成 Markdown');
+    return;
+  }
+  state.cards = splitMarkdownToCards(markdown);
+  renderCards();
+};
+
+const downloadText = (filename, content) => {
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+fetchButton?.addEventListener('click', handleFetchImages);
+imageUpload?.addEventListener('change', handleUpload);
+ocrButton?.addEventListener('click', runOcr);
+rewriteButton?.addEventListener('click', runRewrite);
+buildCardsButton?.addEventListener('click', buildCards);
+downloadAllButton?.addEventListener('click', () => {
+  const content = state.cards.join('\n\n');
+  if (!content) {
+    setStatus('暂无可下载卡片');
+    return;
+  }
+  downloadText('elisi-cards.md', content);
 });
 
-runButton.addEventListener('click', runPipeline);
+document.addEventListener('input', (event) => {
+  const ocrNode = event.target.closest('[data-ocr-index]');
+  if (ocrNode) {
+    const index = Number(ocrNode.dataset.ocrIndex);
+    state.ocrTexts[index] = ocrNode.value;
+  }
+
+  const cardNode = event.target.closest('[data-card-index]');
+  if (cardNode) {
+    const index = Number(cardNode.dataset.cardIndex);
+    state.cards[index] = cardNode.value;
+  }
+});
 
 document.addEventListener('click', (event) => {
-  const target = event.target.closest('[data-copy]');
+  const target = event.target.closest('[data-download-card]');
   if (!target) return;
-  const type = target.dataset.copy;
-  if (type === 'title') return copyText(state.final?.title);
-  if (type === 'content') return copyText(state.final?.content);
-  if (type === 'prompts') return copyText(JSON.stringify(state.final?.image_prompts || [], null, 2));
-  if (type.startsWith('prompt-')) {
-    const index = Number(type.replace('prompt-', ''));
-    const prompt = state.final?.image_prompts?.[index];
-    const text = typeof prompt === 'string' ? prompt : JSON.stringify(prompt, null, 2);
-    return copyText(text);
-  }
+  const index = Number(target.dataset.downloadCard);
+  const content = state.cards[index];
+  if (!content) return;
+  downloadText(`elisi-card-${index + 1}.md`, content);
 });
 
-manualToggle.dispatchEvent(new Event('change'));
-renderRounds();
-renderOutput();
+renderImages();
+renderOcrResults();
+renderCards();
