@@ -573,8 +573,8 @@ const extractImageUrls = (html) => {
   return uniqueList(sorted);
 };
 
-app.post('/api/xhs', async (req, res) => {
-  const { url } = req.body || {};
+const handleXhsRequest = async (req, res) => {
+  const url = (req.body && req.body.url) || req.query?.url;
   if (!url) {
     return res.status(400).json({ ok: false, error: 'URL_REQUIRED', message: 'url is required' });
   }
@@ -603,7 +603,10 @@ app.post('/api/xhs', async (req, res) => {
   } catch (err) {
     return res.status(502).json({ ok: false, error: 'FETCH_FAILED', message: err.message });
   }
-});
+};
+
+app.get('/api/xhs', handleXhsRequest);
+app.post('/api/xhs', handleXhsRequest);
 
 app.post('/api/ocr', async (req, res) => {
   const { images = [], settings = {} } = req.body || {};
