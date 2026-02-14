@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReelShort | AI 剧情模板视频生成平台</title>
-  <meta name="description" content="基于经典影视模板，快速生成专属 AI 剧情短视频的站点框架，采用 NextUI 风格。">
+  <title>Elisi 插件 | 小红书内容复刻与卡片生成</title>
+  <meta name="description" content="从小红书链接提取图片并 OCR，融入 Elisi 重写为 Markdown，再生成可编辑卡片并下载。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,1061 +13,166 @@
 <body>
   <header class="site-header">
     <div class="brand">
-      <span class="logo">🎥</span>
+      <span class="logo">🧭</span>
       <div class="brand-text">
-        <strong>ReelShort</strong>
-        <small>AI 剧情模板视频生成平台</small>
+        <strong>Elisi 插件</strong>
+        <small>小红书素材 → OCR → Markdown → 卡片</small>
       </div>
     </div>
     <nav class="nav">
-      <a href="#overview">概览</a>
-      <a href="#templates">模板库</a>
-      <a href="#story-library">故事库</a>
-      <a href="#editor">模板编辑器</a>
-      <a href="#pipeline">生成流程</a>
-      <a href="#pricing">套餐</a>
-      <a href="#roadmap">里程碑</a>
-      <a href="/elisi-devkit.html">Elisi 开发包</a>
+      <a href="#flow">流程</a>
+      <a href="#input">链接提取</a>
+      <a href="#ocr">OCR</a>
+      <a href="#rewrite">Markdown 重写</a>
+      <a href="#cards">卡片</a>
+      <a href="/elisi-devkit.html">开发包</a>
     </nav>
   </header>
 
   <main>
-    <section class="hero">
+    <section class="hero hero-compact">
       <div class="hero-body">
-        <p class="eyebrow">v1.0 框架已搭建 · NextUI 设计语言</p>
-        <h1>用经典影视模板，一键生成你的 AI 剧情短视频</h1>
-        <p class="lede">围绕“热门故事库 → 模板库 → 模板编辑器 → AI 生成 → 用户中心”的全流程体验，当前页面仅呈现站点框架与占位逻辑，视频/语音/模型调用接口已预留，后续可直接接入 Runway、Pika、Sora、TTS 等服务。</p>
+        <p class="eyebrow">Elisi 插件流程</p>
+        <h1>把小红书爆款链接拆解成可编辑卡片</h1>
+        <p class="lede">链接访问提取图片 → OCR 识别内容 → Elisi 重写为 Markdown → 自动生成可编辑卡片并下载到本地。</p>
         <div class="cta-row">
-          <a class="btn primary" href="#templates">浏览模板框架</a>
-          <a class="btn ghost" href="#api">查看接口占位</a>
-          <span class="pill">Phase 1 · 基础框架</span>
-        </div>
-        <div class="hero-cards">
-          <article class="card">
-            <p class="badge">降低门槛</p>
-            <h3>无需剪辑/编剧</h3>
-            <p>通过结构化模板与变量表单，普通用户也能快速生成剧情视频。</p>
-          </article>
-          <article class="card">
-            <p class="badge">可复用</p>
-            <h3>故事结构复用</h3>
-            <p>基于经典影视结构，替换角色、地点、冲突等变量即可产出新故事。</p>
-          </article>
-          <article class="card">
-            <p class="badge">生态</p>
-            <h3>创作者模板市场</h3>
-            <p>预留创作者上传、分享与授权入口，为模板生态化做好准备。</p>
-          </article>
-        </div>
-      </div>
-      <div class="hero-sidecard">
-        <div class="sidecard-head">
-          <span class="dot online"></span> 当前状态
-        </div>
-        <ul class="checklist">
-          <li><span class="dot success"></span> 信息架构与导航</li>
-          <li><span class="dot success"></span> 模块化版块布局</li>
-          <li><span class="dot warning"></span> 外部视频/语音接口：待对接</li>
-          <li><span class="dot warning"></span> 生成队列 &amp; 计费：待接入</li>
-        </ul>
-        <div class="sidecard-footer">
-          <p class="muted">本页采用 NextUI 卡片、徽章、时间轴风格，便于后续迁移至 Next.js + NextUI 组件。</p>
+          <a class="btn primary" href="#input">开始提取</a>
+          <a class="btn ghost" href="#rewrite">配置 AI</a>
+          <span class="pill">AI 可调用 · 支持自定义模型</span>
         </div>
       </div>
     </section>
 
-    <section id="overview" class="section">
+    <section id="flow" class="section">
       <div class="section-head">
-        <p class="eyebrow">产品目标 & 价值</p>
-        <h2>让每个人都能用模板讲好故事</h2>
-        <p class="section-desc">围绕普通用户、内容创作者、品牌/IP 三类群体提供定制化价值，匹配 PRD 的目标、价值与场景。</p>
-      </div>
-      <div class="grid three">
-        <article class="card">
-          <h3>目标用户</h3>
-          <ul class="list">
-            <li>普通用户：一键生成趣味视频</li>
-            <li>内容创作者：高效脚本与成片自动化</li>
-            <li>IP/品牌方：可控模板与品牌化输出</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>关键场景</h3>
-          <ul class="list">
-            <li>快速生成故事视频</li>
-            <li>深度定制：变量、Prompt、分镜</li>
-            <li>生成脚本用于拍摄或剪辑</li>
-            <li>模板创作者生态（未来）</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>成功度量</h3>
-          <ul class="list">
-            <li>模板转化率：模板 → 生成请求</li>
-            <li>生成完成率 & 队列时延</li>
-            <li>留存：收藏模板、复用模板次数</li>
-            <li>付费转化：Pro & 创作者版</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <section id="templates" class="section">
-      <div class="section-head">
-        <p class="eyebrow">模块 01</p>
-        <h2>模板库（Templates Library）</h2>
-        <p class="section-desc">按分类、标签、搜索呈现经典影视/剧情模板，详情页展示结构、变量与示例脚本。</p>
-      </div>
-      <div class="grid three">
-        <article class="card">
-          <p class="badge">分类/推荐</p>
-          <h3>电影、剧集、类型、创作者精选</h3>
-          <p class="muted">支持关键词搜索与热门推荐逻辑，占位的筛选条可直接绑定后端数据。</p>
-        </article>
-        <article class="card">
-          <p class="badge">模板详情</p>
-          <h3>简介 · 场景结构 · 示例脚本</h3>
-          <p class="muted">展示变量占位符、示例视频位与故事结构树，便于快速评估。</p>
-        </article>
-        <article class="card">
-          <p class="badge">收藏/使用</p>
-          <h3>一键收藏与“使用此模板”</h3>
-          <p class="muted">调用占位函数 <code>useTemplate(templateId)</code>，后续可挂载真实 API。</p>
-        </article>
-      </div>
-      <div class="pill-group">
-        <span class="pill ghost">搜索：角色 / 电影名 / 类型</span>
-        <span class="pill ghost">模板卡片：封面 + 标签 + 受欢迎度</span>
-        <span class="pill ghost">收藏夹：用户中心入口</span>
-      </div>
-    </section>
-
-    <section id="story-library" class="section">
-      <div class="section-head">
-        <p class="eyebrow">模块 02</p>
-        <h2>热门经典故事库（Story Vault）</h2>
-        <p class="section-desc">将热门经典电视剧 &amp; 电影中的高传播记忆点转写为文字分镜，整理成可直接喂给 AI 的故事素材，确保生成效果稳定。</p>
-      </div>
-      <div class="library-meta">
-        <article class="card">
-          <p class="badge">选取原则</p>
-          <h3>情绪峰值 + 传播度 + 版权安全</h3>
-          <p class="muted">优先提取 30 秒-90 秒的情绪高点或反转桥段，标注情绪线、冲突点与出圈台词，只保留结构化描述避免版权侵权。</p>
-        </article>
-        <article class="card">
-          <p class="badge">喂给 AI 的格式</p>
-          <h3>文字分镜 · 角色变量 · 风格提示</h3>
-          <p class="muted">每个故事包含 4-8 个镜头节点，提供镜头景别、角色行为、台词/旁白、BGM/气氛提示，并预留 <code>{{role}}</code>、<code>{{location}}</code> 变量。</p>
-        </article>
-        <article class="card">
-          <p class="badge">应用入口</p>
-          <h3>一键选用 · 复制模板</h3>
-          <p class="muted">点击“加入生成”即可把分镜结构写入生成队列；“复制分镜模板”复制标准 JSON/Prompt 片段，方便直接调用模型。</p>
-        </article>
-      </div>
-      <div class="pill-group">
-        <span class="pill">类型：爱情 / 家庭 / 励志 / 悬疑</span>
-        <span class="pill">来源：电视剧 / 电影</span>
-        <span class="pill">时长：30s / 60s / 90s</span>
-        <span class="pill">变量：角色名、地点、时代背景</span>
-        <span class="pill ghost">质量：共鸣度 ≥ 8 /10 · 模型可控</span>
-      </div>
-      <div class="story-grid">
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电视剧 · 家庭群像</p>
-              <h3>《请回答1988》 · 被遗忘的生日</h3>
-              <p class="muted">德善生日无人记得，好友家人补上惊喜，情绪峰值从失落到治愈，适合“反转温暖”模版。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">60s</span>
-              <span class="chip">情绪：失落 → 温暖</span>
-              <span class="chip">场景 5</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">家庭</span>
-            <span class="pill ghost">成长</span>
-            <span class="pill ghost">治愈反转</span>
-            <span class="pill ghost">旁白可选</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">室内 · 清晨</p>
-                <p class="muted">{{role:德善}} 端着早餐，看着满桌只剩冷掉的面包，没人提起生日，嘴角勉强上扬。</p>
-              </div>
-              <span class="chip">00:00-00:12</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">学校走廊</p>
-                <p class="muted">朋友们被 {{role:珍珠}} 拉走，留下德善被忽视的背影；镜头推到她攥紧书本的手。</p>
-              </div>
-              <span class="chip">00:12-00:24</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">夜 · 小巷</p>
-                <p class="muted">灯光忽暗又亮，好友们端着拉面蛋糕冲出，大声唱生日歌；德善被拥抱时落泪，镜头环绕。</p>
-              </div>
-              <span class="chip">00:24-00:44</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">合影定格</p>
-                <p class="muted">旁白提示“把遗憾变成惊喜”并留出 {{bgm:温暖木吉他}}；镜头冻结在众人笑脸。</p>
-              </div>
-              <span class="chip">00:44-00:60</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电视剧 · 热血群像</p>
-              <h3>《权力的游戏》 · 私生子之战冲锋</h3>
-              <p class="muted">雪夜战场的压迫与绝地冲锋，适合“史诗对峙/以小搏大”主题，角色可替换为任意阵营。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">70s</span>
-              <span class="chip">情绪：窒息 → 咆哮</span>
-              <span class="chip">场景 5</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">史诗</span>
-            <span class="pill ghost">战场群像</span>
-            <span class="pill ghost">逆袭</span>
-            <span class="pill ghost">暴风雪</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">雪原对峙 · 慢推</p>
-                <p class="muted">{{role:主将}} 独自骑马站在雪地中央，敌军排山倒海逼近，镜头慢推压迫感提升。</p>
-              </div>
-              <span class="chip">00:00-00:15</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">拔剑迎战 · 特写</p>
-                <p class="muted">主将拔剑抬盾正面迎击，马匹被射倒，镜头贴近胸腔呼吸与箭矢呼啸。</p>
-              </div>
-              <span class="chip">00:15-00:32</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">近身乱战 · 跟拍</p>
-                <p class="muted">士兵从两翼撞上，尘雪飞扬；手持摄影跟随主将拼杀，突出肢体动作与挣扎。</p>
-              </div>
-              <span class="chip">00:32-00:52</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">援军压上 · 远景</p>
-                <p class="muted">号角响起，{{role:援军}} 从侧翼突击，镜头拉远展现战线扭转；BGM 提示 {{bgm:战鼓+铜管}}。</p>
-              </div>
-              <span class="chip">00:52-01:10</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电影 · 灾难爱情</p>
-              <h3>《泰坦尼克号》 · 船头拥抱</h3>
-              <p class="muted">经典“I'm flying”瞬间，开放海景与自由象征，适合浪漫/励志剧情改写。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">45s</span>
-              <span class="chip">情绪：压抑 → 释放</span>
-              <span class="chip">场景 4</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">浪漫</span>
-            <span class="pill ghost">自由意象</span>
-            <span class="pill ghost">海景远景</span>
-            <span class="pill ghost">男女主可替换</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">甲板黄昏 · 推进</p>
-                <p class="muted">{{role:女主}} 被海风吹起头发，{{role:男主}} 拉她走向船头，镜头跟随穿过船员与旅客。</p>
-              </div>
-              <span class="chip">00:00-00:10</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">船头俯瞰</p>
-                <p class="muted">女主闭眼张开双臂，摄像机从脚下海浪向上拉升，伴随海鸥鸣叫。</p>
-              </div>
-              <span class="chip">00:10-00:22</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">拥抱与台词</p>
-                <p class="muted">男主从后拥住，低声说“现在相信我了吗”；女主睁眼，风声中喊出“我在飞！”</p>
-              </div>
-              <span class="chip">00:22-00:36</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">远景定格</p>
-                <p class="muted">镜头拉远展示整艘船切开海面，BGM 提示 {{bgm:抒情弦乐}}，以光晕收尾。</p>
-              </div>
-              <span class="chip">00:36-00:45</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电影 · 都市超级英雄</p>
-              <h3>《蜘蛛侠2》 · 地铁急停救援</h3>
-              <p class="muted">城市地铁失控，英雄用蛛丝拖停列车并被众人托举，是“牺牲与守护”情绪的经典案例。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">60s</span>
-              <span class="chip">情绪：紧绷 → 感恩</span>
-              <span class="chip">场景 5</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">救援</span>
-            <span class="pill ghost">群体情绪</span>
-            <span class="pill ghost">高速运动</span>
-            <span class="pill ghost">英雄可替换</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">车厢失控 · 抖动</p>
-                <p class="muted">地铁狂奔，乘客尖叫；{{role:英雄}} 透视发现前方断轨，镜头快速切换仪表与乘客。</p>
-              </div>
-              <span class="chip">00:00-00:15</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">跃出车顶 · 广角</p>
-                <p class="muted">英雄撕开车顶跳到前方，蜘蛛丝射向两侧建筑形成网；俯拍展现城市峡谷。</p>
-              </div>
-              <span class="chip">00:15-00:30</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">拖停瞬间 · 慢动作</p>
-                <p class="muted">蛛丝被拉至极限，英雄面具下咬牙，手臂颤抖；慢动作结合 {{bgm:紧张鼓点渐停}}。</p>
-              </div>
-              <span class="chip">00:30-00:48</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">众人托举 · 近景</p>
-                <p class="muted">列车停下，乘客排开托举英雄回车厢，悄声说“他还是个孩子”；留出旁白位可替换口号。</p>
-              </div>
-              <span class="chip">00:48-01:00</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电视剧 · 古装宫廷</p>
-              <h3>《甄嬛传》 · 滴血验亲</h3>
-              <p class="muted">紧张反转的审判场面，权力斗争浓度高，适合“阴谋拆解/反转”模型训练。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">75s</span>
-              <span class="chip">情绪：质疑 → 崩塌</span>
-              <span class="chip">场景 6</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">宫廷</span>
-            <span class="pill ghost">悬疑</span>
-            <span class="pill ghost">多角色对峙</span>
-            <span class="pill ghost">仪式感道具</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">大殿 · 俯拍</p>
-                <p class="muted">众人跪在御前，银盆端上，{{role:太后}} 冷声宣布验亲；鼓点般的心跳声入场。</p>
-              </div>
-              <span class="chip">00:00-00:15</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">特写 · 滴血融合</p>
-                <p class="muted">鲜血滴入热水，镜头极近拍摄血液散开；{{role:甄嬛}} 盯着水面，手微颤。</p>
-              </div>
-              <span class="chip">00:15-00:32</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">对峙 · 语言反转</p>
-                <p class="muted">水面未融合，引发嘈杂；甄嬛开口指出“血滴子早被换过”，镜头切到 {{prop:银盆}} 底部暗纹。</p>
-              </div>
-              <span class="chip">00:32-00:55</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">势力崩塌</p>
-                <p class="muted">{{role:皇后}} 神情破防，被带走；甄嬛跪谢，旁白提示“真相需要证据链”，留白供模型扩写。</p>
-              </div>
-              <span class="chip">00:55-01:15</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电影 · 科幻动作</p>
-              <h3>《盗梦空间》 · 雪山堡垒失重救援</h3>
-              <p class="muted">三层梦境交错的时间差行动，适合训练“多线并行/时间压缩”的剧情感与视觉感。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">90s</span>
-              <span class="chip">情绪：紧张 → 爆破</span>
-              <span class="chip">场景 7</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">团队配合</span>
-            <span class="pill ghost">多线叠加</span>
-            <span class="pill ghost">雪地动作</span>
-            <span class="pill ghost">时间差剪辑</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">雪山堡垒外 · 突入</p>
-                <p class="muted">{{role:特工}} 队伍滑雪冲向堡垒，远景展示爆炸烟雾；无线电提示“第三层时间所剩不多”。</p>
-              </div>
-              <span class="chip">00:00-00:18</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">室内失重 · 走廊翻转</p>
-                <p class="muted">第二层酒店失重，{{role:护卫}} 抱着睡梦中的目标沿墙奔跑，镜头旋转 360° 呈现翻滚。</p>
-              </div>
-              <span class="chip">00:18-00:45</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">水中车坠 · 时间对齐</p>
-                <p class="muted">第一层面包车慢动作坠入河中，配合倒计时旁白；镜头切回雪山，炸药安放完毕。</p>
-              </div>
-              <span class="chip">00:45-01:10</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">爆破与唤醒</p>
-                <p class="muted">堡垒内爆破震出雪尘，失重房间用“踢”唤醒目标；多线同时剪切，BGM 升级到管弦激昂。</p>
-              </div>
-              <span class="chip">01:10-01:30</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电视剧 · 都市励志</p>
-              <h3>《欢乐颂》 · 天台释压抱团</h3>
-              <p class="muted">五个女孩在天台宣泄压力互相鼓励，适合打造“女性群像/友情治愈”主题的短视频。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">50s</span>
-              <span class="chip">情绪：压抑 → 释怀</span>
-              <span class="chip">场景 4</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">都市</span>
-            <span class="pill ghost">女性友谊</span>
-            <span class="pill ghost">励志</span>
-            <span class="pill ghost">群像抱团</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">夜色天台 · 低角度</p>
-                <p class="muted">{{role:安迪}} 站在护栏前沉默，城市霓虹虚化；脚步声中姐妹们逐个出现，镜头推近表情。</p>
-              </div>
-              <span class="chip">00:00-00:12</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">抛出烦恼 · 情绪释放</p>
-                <p class="muted">{{role:樊胜美}} 模拟把烦恼写在纸上丢向夜空，其他人跟随，高空俯拍纸片飘落。</p>
-              </div>
-              <span class="chip">00:12-00:26</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">围成一圈 · 对话提气</p>
-                <p class="muted">五人拉手形成小圈，{{role:曲筱绡}} 笑着说“谁欺负我们就反击回去”；镜头环绕捕捉笑点。</p>
-              </div>
-              <span class="chip">00:26-00:40</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">远景定格 · 口号</p>
-                <p class="muted">众人高举饮料碰杯，大喊“明天会更好”；旁白留空便于替换 BGM {{bgm:轻快鼓点}}。</p>
-              </div>
-              <span class="chip">00:40-00:50</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-
-        <article class="story-card">
-          <header class="story-head">
-            <div>
-              <p class="badge">电影 · 温情励志</p>
-              <h3>《阿甘正传》 · 公交站长椅回忆</h3>
-              <p class="muted">平静讲述人生起伏的长椅段落，可替换角色与经历，用于“平凡人史诗/旁白驱动”生成。</p>
-            </div>
-            <div class="story-meta">
-              <span class="chip">80s</span>
-              <span class="chip">情绪：平静 → 触动</span>
-              <span class="chip">场景 5</span>
-            </div>
-          </header>
-          <div class="story-tags">
-            <span class="pill ghost">旁白驱动</span>
-            <span class="pill ghost">人生旅程</span>
-            <span class="pill ghost">复古美式</span>
-            <span class="pill ghost">角色可替换</span>
-          </div>
-          <div class="story-beats">
-            <div class="beat">
-              <span class="beat-index">01</span>
-              <div>
-                <p class="beat-title">公交站 · 静态开场</p>
-                <p class="muted">{{role:主角}} 坐在长椅上，脚边放着手提箱，镜头特写一根飘落的羽毛。</p>
-              </div>
-              <span class="chip">00:00-00:18</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">02</span>
-              <div>
-                <p class="beat-title">递出巧克力 · 旁白</p>
-                <p class="muted">主角递巧克力给陌生人，说出“人生就像一盒巧克力”；旁白留空可替换哲理句。</p>
-              </div>
-              <span class="chip">00:18-00:36</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">03</span>
-              <div>
-                <p class="beat-title">插叙蒙太奇 · 成长片段</p>
-                <p class="muted">切入童年奔跑、战争训练、运动荣誉等闪回，镜头节奏加快；BGM 可用 {{bgm:钢琴+口琴}}。</p>
-              </div>
-              <span class="chip">00:36-01:00</span>
-            </div>
-            <div class="beat">
-              <span class="beat-index">04</span>
-              <div>
-                <p class="beat-title">回到长椅 · 目光温柔</p>
-                <p class="muted">闪回结束，主角凝视远方微笑，镜头缓慢拉远，阳光照在长椅上结束。</p>
-              </div>
-              <span class="chip">01:00-01:20</span>
-            </div>
-          </div>
-          <footer class="story-actions">
-            <button class="btn ghost">加入生成</button>
-            <button class="btn primary">复制分镜模板</button>
-          </footer>
-        </article>
-      </div>
-    </section>
-
-    <section id="editor" class="section">
-      <div class="section-head">
-        <p class="eyebrow">模块 03</p>
-        <h2>模板编辑器（Template Editor）</h2>
-        <p class="section-desc">表单变量替换 + 高级 Prompt + 分镜脚本三段式结构，便于逐层细化。</p>
-      </div>
-      <div class="grid three">
-        <article class="card">
-          <p class="badge">变量替换区</p>
-          <h3>表单驱动的参数填写</h3>
-          <ul class="list">
-            <li>主角姓名/性别/年龄</li>
-            <li>地点、背景设定、冲突、反派</li>
-            <li>结局方向：喜剧/悲剧/开放式</li>
-          </ul>
-          <p class="muted">输入后实时同步占位符，保留 <code>onVariableChange</code> 回调接口。</p>
-        </article>
-        <article class="card">
-          <p class="badge">高级 Prompt</p>
-          <h3>Prompt 预览与一键优化</h3>
-          <ul class="list">
-            <li>查看/编辑完整 Prompt</li>
-            <li>追加“更电影感”等修饰词</li>
-            <li>增删场景结构，LLM 优化入口预留</li>
-          </ul>
-        </article>
-        <article class="card">
-          <p class="badge">分镜脚本</p>
-          <h3>Scene Breakdown</h3>
-          <ul class="list">
-            <li>镜头描述、角色动作、对白</li>
-            <li>可视化分镜列表</li>
-            <li>导出为生成管线输入</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <section id="pipeline" class="section">
-      <div class="section-head">
-        <p class="eyebrow">模块 04</p>
-        <h2>AI 视频生成流程</h2>
-        <p class="section-desc">从 Prompt 合成到分镜、配音、BGM、视频合成的完整流水线，当前以占位状态呈现，可直接挂接外部模型。</p>
-      </div>
-      <div class="pipeline">
-        <div class="step">
-          <span class="step-index">01</span>
-          <div>
-            <h4>合成最终 Prompt</h4>
-            <p class="muted">聚合变量、模板结构与高级指令，输出标准化 Prompt。</p>
-          </div>
-          <span class="chip">已就绪</span>
-        </div>
-        <div class="step">
-          <span class="step-index">02</span>
-          <div>
-            <h4>分镜生成</h4>
-            <p class="muted">Scene Engine 占位：<code>POST /api/storyboards</code>。</p>
-          </div>
-          <span class="chip">待接入</span>
-        </div>
-        <div class="step">
-          <span class="step-index">03</span>
-          <div>
-            <h4>视频/人物风格</h4>
-            <p class="muted">支持写实/动画/赛博朋克/历史/浪漫主义；人物真人/动漫/低模。</p>
-          </div>
-          <span class="chip">占位</span>
-        </div>
-        <div class="step">
-          <span class="step-index">04</span>
-          <div>
-            <h4>配音 &amp; BGM</h4>
-            <p class="muted">TTS &amp; BGM Engine 占位：<code>POST /api/audio</code>。</p>
-          </div>
-          <span class="chip">待接入</span>
-        </div>
-        <div class="step">
-          <span class="step-index">05</span>
-          <div>
-            <h4>视频合成与下载</h4>
-            <p class="muted">Video Engine 已接入：<code>POST /api/videos</code> → 轮询 <code>GET /api/videos/:id</code>，支持 15/30/60/90 秒。</p>
-          </div>
-          <span class="chip">已接入 · 轮询</span>
-        </div>
-      </div>
-      <div class="pill-group">
-        <span class="pill ghost">生成队列：展示排队状态 & 剩余时间</span>
-        <span class="pill ghost">结果：高清下载 / 链接分享 / 社交分享</span>
-      </div>
-    </section>
-
-    <section id="dashboard" class="section">
-      <div class="section-head">
-        <p class="eyebrow">模块 05</p>
-        <h2>用户中心</h2>
-        <p class="section-desc">覆盖作品、模板、收藏、账户、付费、历史、配额的统一入口。</p>
+        <p class="eyebrow">全流程</p>
+        <h2>从链接到卡片的自动化路径</h2>
+        <p class="section-desc">只保留 Elisi 插件相关流程，短视频生成内容已移除。</p>
       </div>
       <div class="grid four">
-        <article class="card"><h3>我的作品</h3><p class="muted">视频列表、生成状态、重新生成。</p></article>
-        <article class="card"><h3>我的/收藏模板</h3><p class="muted">收藏夹与自建模板管理。</p></article>
-        <article class="card"><h3>生成历史</h3><p class="muted">完整 Prompt 追溯与版本记录。</p></article>
-        <article class="card"><h3>付费记录 &amp; 配额</h3><p class="muted">套餐、计费记录、API 调用配额。</p></article>
-      </div>
-    </section>
-
-    <section id="pricing" class="section">
-      <div class="section-head">
-        <p class="eyebrow">登录与付费体系</p>
-        <h2>套餐与权限</h2>
-        <p class="section-desc">对应 PRD 的免费版、Pro、创作者版三档配置，预留登录与支付接口。</p>
-      </div>
-      <div class="pricing">
-        <article class="plan">
-          <p class="badge">免费版</p>
-          <h3>¥0</h3>
-          <ul class="list">
-            <li>每日 1 次生成</li>
-            <li>低分辨率视频</li>
-            <li>微信 / Google / 邮箱登录占位</li>
-          </ul>
-          <button class="btn block ghost">立即体验</button>
+        <article class="card">
+          <p class="badge">Step 01</p>
+          <h3>链接解析</h3>
+          <p class="muted">访问小红书链接，抓取笔记图片并生成素材清单。</p>
         </article>
-        <article class="plan">
-          <p class="badge">Pro（月付）</p>
-          <h3>¥XX</h3>
-          <ul class="list">
-            <li>高清输出，多次生成</li>
-            <li>优先队列</li>
-            <li>高级编辑能力</li>
-          </ul>
-          <button class="btn block primary">升级</button>
+        <article class="card">
+          <p class="badge">Step 02</p>
+          <h3>图片 OCR</h3>
+          <p class="muted">识别图片中的文字，生成可编辑的 OCR 文本。</p>
         </article>
-        <article class="plan">
-          <p class="badge">创作者版</p>
-          <h3>¥XX</h3>
-          <ul class="list">
-            <li>上传/出售模板</li>
-            <li>商业用途授权</li>
-            <li>模板收益分成</li>
-          </ul>
-          <button class="btn block ghost">即将开放</button>
+        <article class="card">
+          <p class="badge">Step 03</p>
+          <h3>Elisi 重写</h3>
+          <p class="muted">将 OCR 文本与原始标题融合，输出结构化 Markdown。</p>
+        </article>
+        <article class="card">
+          <p class="badge">Step 04</p>
+          <h3>卡片生成</h3>
+          <p class="muted">基于 Markdown 自动拆分卡片，支持编辑与下载。</p>
         </article>
       </div>
     </section>
 
-    <section id="tech" class="section">
+    <section id="input" class="section">
       <div class="section-head">
-        <p class="eyebrow">技术架构</p>
-        <h2>NextUI + 插件化 AI 引擎</h2>
-        <p class="section-desc">前端采用 Next.js/React + NextUI 设计体系；后端与 AI 引擎以插件式抽象，便于快速替换模型。</p>
-      </div>
-      <div class="grid three">
-        <article class="card">
-          <h3>前端</h3>
-          <ul class="list">
-            <li>Next.js + NextUI 组件</li>
-            <li>Tailwind/SSR 可选</li>
-            <li>状态管理：Zustand/Redux</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>后端</h3>
-          <ul class="list">
-            <li>Node (Nest) / Python (FastAPI)</li>
-            <li>用户、模板、任务、计费模块</li>
-            <li>S3 存储，队列管理</li>
-          </ul>
-        </article>
-        <article class="card">
-          <h3>AI 引擎（插件）</h3>
-          <ul class="list">
-            <li>LLM 引擎：Prompt → 脚本</li>
-            <li>Scene Engine：脚本 → 分镜</li>
-            <li>Video / TTS / BGM 引擎</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <section id="api" class="section">
-      <div class="section-head">
-        <p class="eyebrow">API 占位</p>
-        <h2>接口路径与状态</h2>
-        <p class="section-desc">RESTful 路由现已接入本地 Mock Provider，可直接提交脚本生成视频、查询任务状态，并持久化任务记录。</p>
-      </div>
-      <div class="api-table">
-        <div class="api-row">
-          <div>
-            <p class="api-name">POST /api/templates/search</p>
-            <p class="muted">关键词搜索模板，返回分页列表。</p>
-          </div>
-          <span class="chip">占位</span>
-        </div>
-        <div class="api-row">
-          <div>
-            <p class="api-name">POST /api/storyboards</p>
-            <p class="muted">提交变量与 Prompt，生成分镜脚本。</p>
-          </div>
-          <span class="chip">待接入</span>
-        </div>
-        <div class="api-row">
-          <div>
-            <p class="api-name">POST /api/videos</p>
-            <p class="muted">调用视频生成模型（Runway/Pika/Sora）并返回下载地址。</p>
-          </div>
-          <span class="chip">已接入 · Mock</span>
-        </div>
-        <div class="api-row">
-          <div>
-            <p class="api-name">POST /api/audio</p>
-            <p class="muted">TTS + BGM 生成，支持多语言、多声音色。</p>
-          </div>
-          <span class="chip">占位</span>
-        </div>
-        <div class="api-row">
-          <div>
-            <p class="api-name">GET /api/videos/:id</p>
-            <p class="muted">查询视频生成任务状态、排队进度。</p>
-          </div>
-          <span class="chip">已接入 · 轮询</span>
-        </div>
-        <div class="api-row">
-          <div>
-            <p class="api-name">POST /api/billing/checkout</p>
-            <p class="muted">对接 Stripe / 微信支付，完成套餐购买。</p>
-          </div>
-          <span class="chip">待接入</span>
-        </div>
+        <p class="eyebrow">素材输入</p>
+        <h2>链接访问 + 手动补充</h2>
       </div>
       <div class="grid two">
         <article class="card">
-          <p class="badge">数据表</p>
-          <h3>video_jobs / ai_jobs</h3>
-          <p class="muted">字段：id, user_id, provider, provider_job_id, status, input_script, style_params (JSON), output_video_url, error_message, created_at, updated_at。</p>
-          <ul class="list">
-            <li>创建任务时写入 <code>status=pending</code>，调用 Provider 后更新为 <code>running</code>。</li>
-            <li>轮询返回 <code>succeeded</code> 或 <code>failed</code> 时，写入 <code>output_video_url</code> / <code>error_message</code>。</li>
-            <li>默认 Provider 为 Mock，可扩展 Runway/Pika/Sora 适配器。</li>
-          </ul>
+          <label class="label">小红书链接</label>
+          <input class="input" id="urlInput" placeholder="https://www.xiaohongshu.com/explore/xxxx" />
+          <button class="btn primary" id="fetchButton">抓取图片</button>
+          <p class="muted small-note">链接抓取失败时，可在右侧手动补充图片地址或上传截图。</p>
         </article>
         <article class="card">
-          <p class="badge">轮询 Worker</p>
-          <h3>后台状态同步</h3>
-          <p class="muted">每 10 秒扫描 <code>pending</code> / <code>running</code> 任务，通过 Provider.getJobStatus() 更新状态。</p>
-          <ul class="list">
-            <li>成功：写入视频 URL，标记 <code>succeeded</code>。</li>
-            <li>失败：写入错误信息，标记 <code>failed</code>。</li>
-            <li>静态站点也可使用该 Worker 模拟外部 API 行为。</li>
-          </ul>
+          <label class="label">手动图片地址（每行一个）</label>
+          <textarea class="textarea" id="manualImages" rows="6" placeholder="https://...jpg"></textarea>
+          <label class="label">上传截图（可选）</label>
+          <input class="input" type="file" id="imageUpload" multiple accept="image/*" />
         </article>
+      </div>
+      <div class="card" style="margin-top: 16px;">
+        <label class="label">已提取图片</label>
+        <div id="imagesContainer" class="image-grid"></div>
       </div>
     </section>
 
-    <section id="video-demo" class="section">
+    <section id="ocr" class="section">
       <div class="section-head">
-        <p class="eyebrow">生成视频</p>
-        <h2>提交脚本 → 调用视频服务 → 轮询结果</h2>
-        <p class="section-desc">在页面内直接体验 <code>POST /api/videos</code> 与 <code>GET /api/videos/:id</code>，验证脚本入参、任务写库与状态轮询。</p>
+        <p class="eyebrow">OCR</p>
+        <h2>图片内容识别</h2>
       </div>
       <div class="grid two">
         <article class="card">
-          <p class="badge">任务创建</p>
-          <h3>提交生成参数</h3>
-          <form id="video-job-form" class="form-grid">
-            <div class="form-group full-span">
-              <label for="script">故事脚本 / Prompt</label>
-              <textarea id="script" name="script" class="textarea" placeholder="将热门经典故事分镜粘贴到这里，或直接输入自定义 Prompt" required></textarea>
-            </div>
-            <div class="form-group">
-              <label for="duration">时长</label>
-              <select id="duration" name="duration" class="input">
-                <option value="15">15s</option>
-                <option value="30">30s</option>
-                <option value="60">60s</option>
-                <option value="90">90s</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="aspect_ratio">画幅</label>
-              <select id="aspect_ratio" name="aspect_ratio" class="input">
-                <option value="9:16">9:16 竖屏</option>
-                <option value="16:9">16:9 横屏</option>
-                <option value="1:1">1:1 方形</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="style">画面风格</label>
-              <select id="style" name="style" class="input">
-                <option value="cinematic">电影感</option>
-                <option value="anime">动画</option>
-                <option value="cyberpunk">赛博朋克</option>
-                <option value="realistic">写实</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="voice_lang">配音语言</label>
-              <select id="voice_lang" name="voice_lang" class="input">
-                <option value="zh">中文</option>
-                <option value="en">英文</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="voice_type">声音色</label>
-              <select id="voice_type" name="voice_type" class="input">
-                <option value="female-soft">女声 · 亲和</option>
-                <option value="male-warm">男声 · 温暖</option>
-                <option value="narration">旁白 · 纪录片</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="template_id">模板 ID（可选）</label>
-              <input id="template_id" name="template_id" class="input" placeholder="与模板库关联，便于追踪" />
-            </div>
-            <div class="form-group full-span">
-              <button type="submit" id="video-job-submit" class="btn primary block">生成视频</button>
-              <p class="muted">提交后立即写入 video_jobs 表，调用 Provider.createJob()，并开始轮询 Provider.getJobStatus()。</p>
-            </div>
-          </form>
+          <p class="muted">识别图片内文字，结果可直接编辑。</p>
+          <button class="btn primary" id="ocrButton">执行 OCR</button>
+          <p class="muted" id="ocrStatus">等待执行</p>
         </article>
-        <article class="card status-card">
-          <p class="badge">队列状态</p>
-          <h3 id="job-id">尚未创建任务</h3>
-          <div class="status-block">
-            <span id="job-status-chip" class="status-chip ghost">待提交</span>
-            <div>
-              <p id="job-status-text" class="muted">提交脚本后即可创建一条视频任务，并自动进入轮询。</p>
-            </div>
-          </div>
-          <div id="job-video-link" class="status-link" style="display:none;"></div>
-          <div id="job-error" class="status-error" style="display:none;"></div>
-          <div class="pill-group">
-            <span class="pill ghost">pending → running → succeeded/failed</span>
-            <span class="pill ghost">10s 扫描间隔</span>
-            <span class="pill ghost">Mock Provider 可替换</span>
-          </div>
+        <article class="card">
+          <label class="label">OCR 输出</label>
+          <div id="ocrResults" class="ocr-list"></div>
         </article>
       </div>
     </section>
 
-    <section id="compliance" class="section">
+    <section id="rewrite" class="section">
       <div class="section-head">
-        <p class="eyebrow">风控 & 合规</p>
-        <h2>版权、安全与内容审核</h2>
-        <p class="section-desc">严格区分“结构模板”与具体 IP 内容，加入敏感内容审核与 Deepfake 防滥用策略。</p>
-      </div>
-      <div class="pill-group">
-        <span class="pill">模板仅提供结构，不复刻剧情</span>
-        <span class="pill">敏感政治/暴力/未成年人内容审核</span>
-        <span class="pill">Deepfake 滥用防护与身份校验</span>
-        <span class="pill">版权声明 & 授权留痕</span>
-      </div>
-    </section>
-
-    <section id="roadmap" class="section">
-      <div class="section-head">
-        <p class="eyebrow">里程碑</p>
-        <h2>分阶段演进</h2>
-        <p class="section-desc">对应 PRD 阶段性目标，保持每阶段可落地、可演示。</p>
-      </div>
-      <ul class="timeline">
-        <li>
-          <div class="dot filled"></div>
-          <div class="content">
-            <p class="label">Phase 1 · MVP</p>
-            <p class="detail">模板库 + 编辑器 + 单镜头视频生成（当前框架覆盖）。</p>
-          </div>
-        </li>
-        <li>
-          <div class="dot"></div>
-          <div class="content">
-            <p class="label">Phase 2</p>
-            <p class="detail">多镜头、多风格生成，用户中心上线。</p>
-          </div>
-        </li>
-        <li>
-          <div class="dot"></div>
-          <div class="content">
-            <p class="label">Phase 3</p>
-            <p class="detail">商业化模块、模板市场与授权。</p>
-          </div>
-        </li>
-        <li>
-          <div class="dot"></div>
-          <div class="content">
-            <p class="label">Phase 4</p>
-            <p class="detail">创作者生态、移动 App。</p>
-          </div>
-        </li>
-      </ul>
-    </section>
-
-    <section id="faq" class="section">
-      <div class="section-head">
-        <p class="eyebrow">常见问题</p>
-        <h2>关于接口与交付</h2>
-        <p class="section-desc">提前回答后续接入与扩展问题，便于团队对齐。</p>
+        <p class="eyebrow">Elisi 重写</p>
+        <h2>生成 Markdown 文本</h2>
+        <p class="section-desc">支持自定义 OpenAI 兼容 Key/Model，解决无法调用 AI 的问题。</p>
       </div>
       <div class="grid two">
         <article class="card">
-          <h3>如何切换模型供应商？</h3>
-          <p class="muted">AI 引擎采用插件化定义，只需在对应服务实现 <code>generateVideo()</code>、<code>generateVoice()</code> 等接口并在配置中切换。</p>
+          <label class="label">差异化程度</label>
+          <select class="select" id="diffLevel">
+            <option value="low">low</option>
+            <option value="medium" selected>medium</option>
+            <option value="high">high</option>
+          </select>
+          <label class="label">Elisi 植入强度</label>
+          <select class="select" id="elisiStrength">
+            <option value="soft" selected>soft</option>
+            <option value="medium">medium</option>
+          </select>
+          <label class="label">图片张数</label>
+          <select class="select" id="imageCount">
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6" selected>6</option>
+          </select>
         </article>
         <article class="card">
-          <h3>如何接入登录/支付？</h3>
-          <p class="muted">保留 <code>/api/auth</code> 与 <code>/api/billing</code> 路由占位，可挂载微信/Google OAuth 与 Stripe/微信支付 SDK。</p>
+          <label class="label">AI Key（OpenAI 兼容）</label>
+          <input class="input" id="apiKeyInput" placeholder="sk-..." />
+          <label class="label">API Base（可选）</label>
+          <input class="input" id="apiBaseInput" placeholder="https://api.openai.com/v1" />
+          <label class="label">模型</label>
+          <input class="input" id="apiModelInput" placeholder="gpt-4o-mini" />
+          <button class="btn primary block" id="rewriteButton">生成 Markdown</button>
+          <p class="muted" id="statusText">等待输入</p>
         </article>
       </div>
+      <article class="card" style="margin-top: 16px;">
+        <label class="label">Markdown 输出</label>
+        <textarea class="textarea" id="markdownOutput" rows="10" placeholder="生成结果将显示在这里"></textarea>
+      </article>
+    </section>
+
+    <section id="cards" class="section">
+      <div class="section-head">
+        <p class="eyebrow">卡片</p>
+        <h2>根据 Markdown 生成卡片</h2>
+      </div>
+      <div class="cta-row">
+        <button class="btn primary" id="buildCardsButton">生成卡片</button>
+        <button class="btn ghost" id="downloadAllButton">下载全部卡片</button>
+      </div>
+      <div id="cardsContainer" class="grid three"></div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div>
-      <strong>ReelShort</strong>
-      <p class="muted">AI 剧情模板视频生成平台 · 框架版</p>
-    </div>
-    <div class="footer-links">
-      <a href="mailto:hi@reelshort.dev">hi@reelshort.dev</a>
-      <a href="#">返回顶部</a>
-    </div>
-  </footer>
-  <script src="/js/video-jobs.js"></script>
+  <script src="/js/elisi-app.js"></script>
 </body>
 </html>
