@@ -3,3 +3,5 @@ npm-debug.log*
 yarn.lock
 pnpm-lock.yaml
 data/
+
+counseling-data/
