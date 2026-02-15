@@ -1,0 +1,8 @@
+{
+  "name": "Counselor Case Management System",
+  "description": "A comprehensive local-first case management tool for psychological counselors featuring weekly scheduling, client CRM, automated session notes, and statistics tracking.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
